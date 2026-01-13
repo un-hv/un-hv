@@ -10,5 +10,5 @@
     "composite": true,
     "lib": ["ESNext"]
   },
-  "include": ["eslint.config.mjs", "prettier.config.mjs"]
+  "include": ["eslint.config.mjs", "prettier.config.mjs", "uno.config.ts"]
 }

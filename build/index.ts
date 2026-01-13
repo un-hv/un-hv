@@ -1,3 +1,4 @@
+import Unocss from 'unocss/vite';
 import AutoImport from 'unplugin-auto-import/vite';
 import { defineConfig, type UserConfig } from 'vite';
 import monkey, { type MonkeyUserScript, util } from 'vite-plugin-monkey';
@@ -48,6 +49,7 @@ export function createMonkeyConfig({
       ...viteOverrides.build,
     },
     plugins: [
+      Unocss(),
       AutoImport({
         imports: [util.unimportPreset],
         dts: false,
