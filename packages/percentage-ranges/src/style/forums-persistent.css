@@ -1,0 +1,30 @@
+.hv-tip-persistent #showequip > div:first-child {
+  font-weight: bold;
+  font-size: 120%;
+  border-bottom: 1px solid #a47c78;
+}
+.hv-tip-persistent .eq > div:nth-child(1),
+.hv-tip-persistent .eq > div:nth-child(2),
+.hv-tip-persistent #equip_extended > div:last-child > div {
+  font-size: 110%;
+  font-weight: bold;
+}
+.hv-tip-persistent .ex,
+.hv-tip .ep {
+  padding-top: 3px !important;
+  margin: 2px auto 0 !important;
+  display: flex;
+  justify-content: center;
+  flex-flow: row wrap;
+}
+.hv-tip-persistent #equip_extended > div:last-child {
+  margin: 7px auto 2px;
+  text-align: center;
+}
+.hv-tip-persistent #eu > span,
+.hv-tip-persistent .es > div:first-child > span {
+  color: red;
+}
+.hv-tip-persistent #ep > span {
+  color: blue;
+}

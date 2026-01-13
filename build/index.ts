@@ -1,0 +1,75 @@
+import { defineConfig, type UserConfig } from 'vite';
+import monkey, { type MonkeyUserScript } from 'vite-plugin-monkey';
+
+interface DefineMonkeyConfigOptions {
+  entry?: string;
+  name: string;
+  version: string;
+  description: string;
+  match: string[];
+  connect?: string[];
+  icon?: string;
+  userscriptOverrides?: MonkeyUserScript;
+  viteOverrides?: UserConfig;
+}
+
+export function createMonkeyConfig({
+  entry = 'src/main.ts',
+  name,
+  version,
+  description,
+  match,
+  connect = [],
+  icon = 'https://e-hentai.org/favicon.ico',
+  userscriptOverrides = {},
+  viteOverrides = {},
+}: DefineMonkeyConfigOptions) {
+  const fileName = `${name.toLowerCase().replaceAll(/\s+/g, '-')}.user.js`;
+  const distUrl = `https://cdn.jsdelivr.net/gh/un-hv/un-hv@release/${fileName}`;
+
+  return defineConfig({
+    build: {
+      target: 'es2018',
+      minify: 'terser',
+      terserOptions: {
+        compress: false,
+        mangle: false,
+        format: {
+          beautify: true,
+          comments: 'all',
+          preserve_annotations: true,
+          indent_level: 2,
+          quote_style: 1,
+        },
+      },
+      outDir: 'dist',
+      emptyOutDir: true,
+      ...viteOverrides.build,
+    },
+    plugins: [
+      monkey({
+        entry,
+        userscript: {
+          name,
+          version,
+          description,
+          namespace: 'https://github.com/un-hv',
+          author: 'un-hv community',
+          copyright: `${new Date().getFullYear()}, un-hv`,
+          icon,
+          match,
+          connect,
+          homepage: 'https://github.com/un-hv/un-hv',
+          supportURL: 'https://forums.e-hentai.org/index.php?showtopic=290597',
+          downloadURL: distUrl,
+          updateURL: distUrl,
+          ...userscriptOverrides,
+        },
+        build: {
+          fileName,
+        },
+      }),
+    ],
+    ...viteOverrides,
+  });
+}
