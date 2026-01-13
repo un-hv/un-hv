@@ -1,8 +1,14 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+    "types": [
+      "vite/client",
+      "vite-plugin-monkey/client",
+      "vite-plugin-monkey/global",
+      "vite-plugin-monkey/style"
+    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "composite": true
   },
   "include": ["packages/*/src/**/*.ts"]
 }

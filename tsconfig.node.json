@@ -1,10 +1,14 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    "noImplicitAny": false,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": true,
     "composite": true,
-    "noEmit": true,
-    "lib": ["ESNext"],
-    "types": ["node"]
+    "lib": ["ESNext"]
   },
-  "include": ["packages/*/vite.config.ts", "build"]
+  "include": ["eslint.config.mjs", "prettier.config.mjs"]
 }

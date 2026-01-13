@@ -1,4 +1,3 @@
-//@ts-check
 import eslint from '@eslint/js';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import pluginBarrelFiles from 'eslint-plugin-barrel-files';
@@ -36,15 +35,13 @@ export default defineConfig(
     },
   },
   {
-    plugins: {
-      // @ts-expect-error https://github.com/typescript-eslint/typescript-eslint/issues/11543
-      'import-x': importX,
-    },
-    extends: ['import-x/flat/recommended'],
+    // @ts-expect-error https://github.com/typescript-eslint/typescript-eslint/issues/11543
+    extends: [importX.flatConfigs.recommended, importX.flatConfigs.typescript],
     settings: {
       'import-x/resolver-next': [
         createTypeScriptImportResolver({
           project: ['./tsconfig.json'],
+          alwaysTryTypes: true,
         }),
       ],
     },
@@ -59,7 +56,6 @@ export default defineConfig(
     rules: { 'perfectionist/sort-imports': 'warn' },
   },
   {
-    //@ts-expect-error
     extends: [pluginBarrelFiles.configs.recommended],
     rules: {
       'barrel-files/avoid-namespace-import': 'off',
