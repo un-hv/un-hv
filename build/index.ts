@@ -1,5 +1,6 @@
+import AutoImport from 'unplugin-auto-import/vite';
 import { defineConfig, type UserConfig } from 'vite';
-import monkey, { type MonkeyUserScript } from 'vite-plugin-monkey';
+import monkey, { type MonkeyUserScript, util } from 'vite-plugin-monkey';
 
 interface DefineMonkeyConfigOptions {
   entry?: string;
@@ -47,6 +48,10 @@ export function createMonkeyConfig({
       ...viteOverrides.build,
     },
     plugins: [
+      AutoImport({
+        imports: [util.unimportPreset],
+        dts: false,
+      }),
       monkey({
         entry,
         userscript: {
