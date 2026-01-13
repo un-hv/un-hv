@@ -1,0 +1,70 @@
+name: Release userscript
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Userscripts
+        run: |
+          mkdir -p release-dist
+
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🔵 Manual Trigger detected: Building ALL packages..."
+            pnpm -r build
+          else
+            echo "🟢 Push detected: Building CHANGED packages since ${{ github.event.before }}..."
+            pnpm --filter "...[${{ github.event.before }}]" build || echo "No packages changed"
+          fi
+
+          echo "📂 Collecting artifacts..."
+          find packages -name "*.user.js" -type f -exec cp {} release-dist/ \;
+
+      - name: Check for artifacts
+        id: check_files
+        run: |
+          if [ -z "$(ls -A release-dist)" ]; then
+             echo "has_files=false" >> $GITHUB_OUTPUT
+             echo "⚠️ No files generated to release."
+          else
+             echo "has_files=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to Release Branch
+        if: steps.check_files.outputs.has_files == 'true' && github.repository == 'un-hv/un-hv'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./release-dist
+          publish_branch: release
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'chore: release userscripts ${{ github.sha }}'
