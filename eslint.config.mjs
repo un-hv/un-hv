@@ -11,7 +11,13 @@ import globals from 'globals';
 import { configs as tseslintConfigs } from 'typescript-eslint';
 
 export default defineConfig(
-  globalIgnores(['**/node_modules/*', '**/dist/*', '.git/', 'pnpm-lock.yaml']),
+  globalIgnores([
+    '**/node_modules/*',
+    '**/dist/*',
+    '.git/',
+    'pnpm-lock.yaml',
+    '**/auto-import.d.ts',
+  ]),
   eslint.configs.recommended,
   {
     extends: [tseslintConfigs.strictTypeChecked, tseslintConfigs.stylisticTypeChecked],

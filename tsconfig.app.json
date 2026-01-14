@@ -5,10 +5,11 @@
       "vite/client",
       "vite-plugin-monkey/client",
       "vite-plugin-monkey/global",
-      "vite-plugin-monkey/style"
+      "vite-plugin-monkey/style",
+      "typed-query-selector"
     ],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "composite": true
   },
-  "include": ["packages/*/src/**/*.ts"]
+  "include": ["packages/*/src/**/*.ts", "build/auto-import.d.ts"]
 }

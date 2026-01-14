@@ -52,7 +52,8 @@ export function createMonkeyConfig({
       Unocss(),
       AutoImport({
         imports: [util.unimportPreset],
-        dts: false,
+        dirs: ['../../build/vanjs.ts'],
+        dts: '../../build/auto-import.d.ts',
       }),
       monkey({
         entry,
