@@ -19,6 +19,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
+// @run-at       document-end
 // ==/UserScript==
 
 (function () {
@@ -26,7 +27,71 @@
 
   const d=new Set;const importCSS = async e=>{d.has(e)||(d.add(e),(t=>{typeof GM_addStyle=="function"?GM_addStyle(t):(document.head||document.documentElement).appendChild(document.createElement("style")).append(t);})(e));};
 
-  const CONFIGS = {
+  importCSS(' .flex-between{display:flex;align-items:center;justify-content:space-between}.flex-col{display:flex;flex-direction:column}.visible{visibility:visible}.absolute{position:absolute}.inset-x-0{left:0;right:0}.bottom-1{bottom:.25rem}.z-10000,[z-10000=""]{z-index:10000}.ml-2{margin-left:.5rem}.ml-5px{margin-left:5px}.block{display:block}.max-h-80vh{max-height:80vh}.cursor-pointer{cursor:pointer}.cursor-move{cursor:move}.touch-none{touch-action:none}.select-none{-webkit-user-select:none;user-select:none}.overflow-auto{overflow:auto}.border-none{border-style:none}.bg-\\#5c0d11{--un-bg-opacity:1;background-color:rgb(92 13 17 / var(--un-bg-opacity))}.bg-transparent{background-color:transparent}.p-10px{padding:10px}.p-2px{padding:2px}.px,[px=""]{padding-left:1rem;padding-right:1rem}.px-6px{padding-left:6px;padding-right:6px}.py-3px{padding-top:3px;padding-bottom:3px}.pt-0\\!{padding-top:0!important}.text-center{text-align:center}.text-10px{font-size:10px}.text-12px{font-size:12px}.text-\\#0ab844{--un-text-opacity:1;color:rgb(10 184 68 / var(--un-text-opacity))}.text-\\#1d3271{--un-text-opacity:1;color:rgb(29 50 113 / var(--un-text-opacity))}.text-\\#edebdf{--un-text-opacity:1;color:rgb(237 235 223 / var(--un-text-opacity))}.text-\\#f03939{--un-text-opacity:1;color:rgb(240 57 57 / var(--un-text-opacity))}.hover\\:text-red:hover,.color-red{--un-text-opacity:1;color:rgb(248 113 113 / var(--un-text-opacity))}.color-inherit{color:inherit}.font-bold{font-weight:700}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace}.decoration-none{text-decoration:none}.shadow{--un-shadow:var(--un-shadow-inset) 0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),var(--un-shadow-inset) 0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.transition-color-200{transition-property:color;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.2s} ');
+
+  const forumsCss = '.hv-tip{position:fixed;width:420px;font-size:8pt;font-family:verdana;text-align:center;color:#5c0d11;background-color:#e3e0d1;padding:4px 0;border:1px solid #5c0d11}.hv-tip p{margin:0}.hv-tip .showequip>div{margin:3px auto 0;padding:1px}.hv-tip .showequip>div:first-child,.hv-tip .eq span,.hv-tip .eqt,.hv-tip .eqr,.hv-tip .eqc{font-weight:700}.hv-tip .showequip>div:first-child{border-bottom:1px solid #a47c78;font-size:10pt;padding:2px 0 4px}.hv-tip .eq>div{margin:1px auto;padding:1px;text-align:center;min-height:17px}.hv-tip .eqt,.hv-tip .eqr{font-size:110%}.hv-tip .ex,.hv-tip .ep{display:grid;gap:2px 5px;justify-items:center}.hv-tip .ex{grid-template-columns:repeat(2,1fr);border-top:1px solid #a47c78;text-align:right!important}.hv-tip .ex>div{width:165px;height:18px}.hv-tip .ex>div>div:nth-child(1){float:left;width:99px;padding:2px;white-space:nowrap}.hv-tip .ex>div>div:nth-child(2){float:left;width:45px;padding:2px 0 2px 2px}.hv-tip .ex>div>div:nth-child(3){float:left;width:6px;padding:2px}.hv-tip .ep>div{width:115px;height:18px}.hv-tip .ep>div:first-child{font-weight:700;margin:4px auto 0!important;width:320px!important;grid-column:1 / -1}.hv-tip .ep>div>div:nth-child(1){float:left;width:60px;padding:2px;text-align:right;white-space:nowrap}.hv-tip .ep>div>div:nth-child(2){float:left;width:45px;padding:2px 0 2px 2px;text-align:left}.hv-tip .ep1{grid-template-columns:repeat(1,1fr)}.hv-tip .ep2{grid-template-columns:repeat(2,1fr)}.hv-tip .ep3{grid-template-columns:repeat(3,1fr)}.hv-tip a:link,.hv-tip a:visited,.hv-tip a:active{color:#5c0d11}';
+
+  importCSS(forumsCss);
+
+  const forumsPersistentCss = '.hv-tip-persistent #showequip>div:first-child{font-weight:700;font-size:120%;border-bottom:1px solid #a47c78}.hv-tip-persistent .eq>div:nth-child(1),.hv-tip-persistent .eq>div:nth-child(2),.hv-tip-persistent #equip_extended>div:last-child>div{font-size:110%;font-weight:700}.hv-tip-persistent .ex,.hv-tip .ep{padding-top:3px!important;margin:2px auto 0!important;display:flex;justify-content:center;flex-flow:row wrap}.hv-tip-persistent #equip_extended>div:last-child{margin:7px auto 2px;text-align:center}.hv-tip-persistent #eu>span,.hv-tip-persistent .es>div:first-child>span{color:red}.hv-tip-persistent #ep>span{color:#00f}';
+
+  importCSS(forumsPersistentCss);
+
+  function isValidKey(e) {
+    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return false;
+    const target = e.target;
+    if (!target) return false;
+    const tag2 = target.tagName;
+    if (tag2 === 'INPUT' || tag2 === 'TEXTAREA' || target.isContentEditable) return false;
+    return true;
+  }
+
+  function getDefaultExportFromCjs(x) {
+    return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+  }
+
+  var isMobile$1 = {
+    exports: {}
+  };
+
+  var hasRequiredIsMobile;
+
+  function requireIsMobile() {
+    if (hasRequiredIsMobile) return isMobile$1.exports;
+    hasRequiredIsMobile = 1;
+    isMobile$1.exports = isMobile2;
+    isMobile$1.exports.isMobile = isMobile2;
+    isMobile$1.exports.default = isMobile2;
+    const mobileRE = /(android|bb\d+|meego).+mobile|armv7l|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|redmi|series[46]0|samsungbrowser.*mobile|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i;
+    const notMobileRE = /CrOS/;
+    const tabletRE = /android|ipad|playbook|silk/i;
+    function isMobile2(opts) {
+      if (!opts) opts = {};
+      let ua = opts.ua;
+      if (!ua && typeof navigator !== 'undefined') ua = navigator.userAgent;
+      if (ua && ua.headers && typeof ua.headers['user-agent'] === 'string') {
+        ua = ua.headers['user-agent'];
+      }
+      if (typeof ua !== 'string') return false;
+      let result = mobileRE.test(ua) && !notMobileRE.test(ua) || !!opts.tablet && tabletRE.test(ua);
+      if (!result && opts.tablet && opts.featureDetect && navigator && navigator.maxTouchPoints > 1 && ua.indexOf('Macintosh') !== -1 && ua.indexOf('Safari') !== -1) {
+        result = true;
+      }
+      return result;
+    }
+    return isMobile$1.exports;
+  }
+
+  var isMobileExports = requireIsMobile();
+
+  const isMobileFn = /* @__PURE__ */ getDefaultExportFromCjs(isMobileExports);
+
+  const isMobile = isMobileFn({
+    tablet: true,
+    featureDetect: true
+  });
+
+  const keyboard_configs = {
     key_toggle: 'f',
     key_pin: 'q',
     key_forge: 'w',
@@ -34,7 +99,86 @@
     key_link: 'l'
   };
 
-  const QUALITY_CONFIG = {
+  const REGEX_TARGET = /^https?:\/\/(alt\.)?hentaiverse\.org\/((isekai\/)?equip|r\/)/;
+
+  var _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != 'undefined' ? GM_getValue : void 0)();
+
+  var _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != 'undefined' ? GM_setValue : void 0)();
+
+  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != 'undefined' ? GM_xmlhttpRequest : void 0)();
+
+  const GM_Request = ({method: method = 'GET', ...rest}, signal) => new Promise((resolve, reject) => {
+    if (signal == null ? void 0 : signal.aborted) {
+      reject(new Error('Aborted'));
+      return;
+    }
+    let abortHandle = null;
+    const onSignalAbort = () => abortHandle == null ? void 0 : abortHandle.abort();
+    const cleanup = () => {
+      if (signal) {
+        signal.removeEventListener('abort', onSignalAbort);
+      }
+    };
+    if (signal) {
+      signal.addEventListener('abort', onSignalAbort);
+    }
+    abortHandle = _GM_xmlhttpRequest({
+      method: method,
+      ...rest,
+      onload: res => {
+        cleanup();
+        if (res.status >= 200 && res.status < 300) resolve(res); else reject(new Error(`HTTP Error: ${res.status} ${res.statusText}`));
+      },
+      onerror: event => {
+        cleanup();
+        reject(new Error(event.error || 'Network Error'));
+      },
+      ontimeout: () => {
+        cleanup();
+        reject(new Error('Timeout'));
+      },
+      onabort: () => {
+        cleanup();
+        reject(new Error('Aborted'));
+      }
+    });
+  });
+
+  const popup = document.getElementById('popup_box');
+
+  const equipInfo = document.getElementById('equipinfo');
+
+  const observer = new MutationObserver(mutations => {
+    for (const m of mutations) {
+      if (m.type === 'childList') {
+        for (const node of m.addedNodes) {
+          if (!(node instanceof HTMLElement)) return;
+          if (!node.classList.contains('showequip')) return;
+          initEquip(node);
+        }
+      } else if (m.type === 'attributes' && m.attributeName === 'style') {
+        const target = m.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.style.visibility === 'visible') {
+          initEquip(target);
+        }
+      }
+    }
+  });
+
+  if (popup) {
+    observer.observe(popup, {
+      attributes: true
+    });
+  }
+
+  if (equipInfo) {
+    observer.observe(equipInfo, {
+      childList: true
+    });
+  }
+
+  const quality_configs = {
     Peerless: {
       range: [ 200, 200 ],
       cap: 50
@@ -69,100 +213,313 @@
     }
   };
 
-  const forumsCss = '.hv-tip{position:fixed;width:420px;font-size:8pt;font-family:verdana;text-align:center;color:#5c0d11;background-color:#e3e0d1;padding:4px 0;border:1px solid #5c0d11}.hv-tip p{margin:0}.hv-tip .showequip>div{margin:3px auto 0;padding:1px}.hv-tip .showequip>div:first-child,.hv-tip .eq span,.hv-tip .eqt,.hv-tip .eqr,.hv-tip .eqc{font-weight:700}.hv-tip .showequip>div:first-child{border-bottom:1px solid #a47c78;font-size:10pt;padding:2px 0 4px}.hv-tip .eq>div{margin:1px auto;padding:1px;text-align:center;min-height:17px}.hv-tip .eqt,.hv-tip .eqr{font-size:110%}.hv-tip .ex,.hv-tip .ep{display:grid;gap:2px 5px;justify-items:center}.hv-tip .ex{grid-template-columns:repeat(2,1fr);border-top:1px solid #a47c78;text-align:right!important}.hv-tip .ex>div{width:165px;height:18px}.hv-tip .ex>div>div:nth-child(1){float:left;width:99px;padding:2px;white-space:nowrap}.hv-tip .ex>div>div:nth-child(2){float:left;width:45px;padding:2px 0 2px 2px}.hv-tip .ex>div>div:nth-child(3){float:left;width:6px;padding:2px}.hv-tip .ep>div{width:115px;height:18px}.hv-tip .ep>div:first-child{font-weight:700;margin:4px auto 0!important;width:320px!important;grid-column:1 / -1}.hv-tip .ep>div>div:nth-child(1){float:left;width:60px;padding:2px;text-align:right;white-space:nowrap}.hv-tip .ep>div>div:nth-child(2){float:left;width:45px;padding:2px 0 2px 2px;text-align:left}.hv-tip .ep1{grid-template-columns:repeat(1,1fr)}.hv-tip .ep2{grid-template-columns:repeat(2,1fr)}.hv-tip .ep3{grid-template-columns:repeat(3,1fr)}.hv-tip a:link,.hv-tip a:visited,.hv-tip a:active{color:#5c0d11}.hv-err{padding:10px;color:#ff2323;font-weight:700}.hv-pin-box{display:flex;flex-direction:column;border:1px solid #5c0d11;box-shadow:0 4px 10px #0006;z-index:10001;padding:0}.hv-pin-header{background-color:#5c0d11;color:#edebdf;padding:3px 6px;cursor:move;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;font-size:10px;font-weight:700;user-select:none}.hv-pin-close:hover{color:#f66}.hv-pin-body{padding:4px 0;overflow:auto;max-height:80vh}';
+  const charmExclusiveBonus = /* @__PURE__ */ new Set([ 'HP Bonus', 'MP Bonus', 'Counter-parry' ]);
 
-  importCSS(forumsCss);
+  const color = {
+    green: 'text-#0ab844',
+    red: 'text-#f03939',
+    mid: 'text-#1d3271'
+  };
 
-  const forumsPersistentCss = '.hv-tip-persistent #showequip>div:first-child{font-weight:700;font-size:120%;border-bottom:1px solid #a47c78}.hv-tip-persistent .eq>div:nth-child(1),.hv-tip-persistent .eq>div:nth-child(2),.hv-tip-persistent #equip_extended>div:last-child>div{font-size:110%;font-weight:700}.hv-tip-persistent .ex,.hv-tip .ep{padding-top:3px!important;margin:2px auto 0!important;display:flex;justify-content:center;flex-flow:row wrap}.hv-tip-persistent #equip_extended>div:last-child{margin:7px auto 2px;text-align:center}.hv-tip-persistent #eu>span,.hv-tip-persistent .es>div:first-child>span{color:red}.hv-tip-persistent #ep>span{color:#00f}';
+  const colorClasses = Object.values(color);
 
-  importCSS(forumsPersistentCss);
+  const removeColor = el => {
+    el.classList.remove(...colorClasses);
+  };
 
-  const $ = (container, selector) => container.querySelector(selector);
-
-  const $$ = selector => document.querySelectorAll(selector);
-
-  function el(tag, props = {}, children = []) {
-    const e = document.createElement(tag);
-    for (const [k, v] of Object.entries(props)) {
-      if (v == null || v === false) continue;
-      if (k === 'style' && typeof v === 'object') {
-        Object.assign(e.style, v);
-      } else if (k === 'dataset' && typeof v === 'object') {
-        Object.assign(e.dataset, v);
-      } else if (k.startsWith('on') && typeof v === 'function') {
-        e[k.toLowerCase()] = v;
-      } else if (k in e) {
-        e[k] = v;
-      } else if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
-        e.setAttribute(k, String(v));
+  function renderEquip(container, compareQuality = null) {
+    const equip = equipMap.get(container);
+    if (!equip) return;
+    const {showPercent: showPercent, showMaxForge: showMaxForge} = globalState;
+    if (equip.type === 'Soulbound') {
+      const {tier_up: up, tier_iw: iw, tier_max: max2} = equip;
+      if (showMaxForge && (max2 - up > 0 || max2 - iw > 0)) {
+        const diff = cur => max2 - cur > 0 ? `${cur}<span class="${color.green}">+${max2 - cur}</span>` : max2;
+        equip._eqt.innerHTML = `Tier ${diff(up)} / ${diff(iw)} / ${max2}`;
+      } else {
+        equip._eqt.textContent = `Tier ${up} / ${iw} / ${max2}`;
       }
     }
-    if (children.length > 0) {
-      const fragment = document.createDocumentFragment();
-      for (const c of children) {
-        if (c != null && typeof c !== 'boolean') {
-          fragment.append(typeof c === 'object' ? c : String(c));
-        }
+    let totalPercent = 0;
+    let statCount = 0;
+    const [min, max] = compareQuality ? quality_configs[compareQuality].range : equip.range;
+    const forge_current = equip.type === 'Soulbound' ? equip.tier_up + equip.tier_iw : 0;
+    const getColor = (percent, max2 = 70, min2 = 30) => percent >= max2 ? color.green : percent <= min2 ? color.red : color.mid;
+    for (const stat of equip.stats) {
+      const el = stat._el;
+      removeColor(el);
+      let percent = null;
+      if (stat.base !== null) {
+        const span2 = max - min || 30;
+        percent = Number.parseFloat(((stat.base - (max - span2)) / span2 * 100).toFixed(1));
+        totalPercent += percent;
+        statCount++;
       }
-      e.append(fragment);
+      const isForgeMode = showMaxForge && equip.forge_max > forge_current && !charmExclusiveBonus.has(stat.title);
+      const isPercentMode = showPercent && !isForgeMode && percent !== null;
+      const hideSurrounding = isForgeMode || isPercentMode;
+      if (stat._preNode) {
+        stat._preNode.textContent = hideSurrounding ? '' : stat.prefix;
+      }
+      if (stat._sufNode && !stat.typeText) {
+        stat._sufNode.textContent = hideSurrounding ? '' : stat.suffix;
+      }
+      const typeText = stat.typeText ? ` ${stat.typeText}` : '';
+      if (isForgeMode) {
+        const ratio = stat.rate / 100;
+        const maxVal = stat.val * (1 + equip.forge_max * ratio) / (1 + forge_current * ratio);
+        const gain = +(maxVal - stat.val).toFixed(2);
+        el.innerHTML = `${stat.valStr}<span class="${color.green}">+${gain}</span>${typeText}`;
+      } else if (isPercentMode && percent !== null) {
+        el.textContent = `${percent}%${typeText}`;
+        el.classList.add(getColor(percent));
+      } else {
+        el.textContent = `${stat.valStr}${typeText}`;
+      }
     }
-    return e;
-  }
-
-  function createBtn(config) {
-    var _a;
-    return el('button', {
-      type: 'button',
-      class: config.class,
-      style: `margin-left: 5px;\n              cursor: pointer !important;\n              transition: color 0.2s;\n              border: none;\n              background: transparent;\n              ${(_a = config.style) != null ? _a : ''}`,
-      onclick: config.onclick
-    }, [ config.text ]);
+    if (statCount > 0) {
+      const avg = Number.parseFloat((totalPercent / statCount).toFixed(1));
+      const mode = showMaxForge ? 'Max Forged' : showPercent ? 'Percentage' : 'Value';
+      equip._avg.innerHTML = `<div class="${getColor(avg, 60, 40)}">Avg: ${avg}%</div><div class="text-10px" title="Hotkeys: f, w">Mode: ${mode}</div>`;
+    } else {
+      equip._avg.textContent = '';
+    }
   }
 
   const equipMap = /* @__PURE__ */ new WeakMap;
 
-  const globalState = {
-    showPercent: GM_getValue('showPercent', true),
-    showMaxForge: false,
-    isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  const state$1 = {
+    showPercent: _GM_getValue('showPercent', true),
+    showMaxForge: false
   };
 
-  const UI_BUTTONS = {
-    get PERCENT() {
-      return createBtn({
-        text: '%',
-        onclick: togglePercent,
-        style: 'font-weight: bold;'
-      });
-    },
-    get FORGE() {
-      return createBtn({
-        text: '🔨',
-        onclick: toggleForge
-      });
-    }
-  };
+  const globalState = state$1;
 
   function togglePercent() {
-    if (globalState.showMaxForge) globalState.showMaxForge = false;
-    globalState.showPercent = !globalState.showPercent;
-    GM_setValue('showPercent', globalState.showPercent);
-    globalThis.dispatchEvent(new CustomEvent('hv-state-change'));
+    state$1.showMaxForge = false;
+    state$1.showPercent = !state$1.showPercent;
+    _GM_setValue('showPercent', state$1.showPercent);
+    renderAll();
   }
 
   function toggleForge() {
-    globalState.showMaxForge = !globalState.showMaxForge;
-    if (globalState.showMaxForge) globalState.showPercent = false;
-    globalThis.dispatchEvent(new CustomEvent('hv-state-change'));
+    state$1.showPercent = false;
+    state$1.showMaxForge = !state$1.showMaxForge;
+    renderAll();
   }
 
-  globalThis.addEventListener('hv-toggle-percent', () => {
-    togglePercent();
+  function renderAll() {
+    if ((popup == null ? void 0 : popup.style.visibility) === 'visible') {
+      renderEquip(popup);
+    }
+    for (const el of document.querySelectorAll('.showequip')) {
+      const select2 = el.querySelector('select');
+      renderEquip(el, select2 ? select2.value : null);
+    }
+  }
+
+  let protoOf = Object.getPrototypeOf;
+
+  let changedStates, derivedStates, curDeps, curNewDerives, alwaysConnectedDom = {
+    isConnected: 1
+  };
+
+  let gcCycleInMs = 1e3, statesToGc, propSetterCache = {};
+
+  let objProto = protoOf(alwaysConnectedDom), funcProto = protoOf(protoOf), _undefined;
+
+  let addAndScheduleOnFirst = (set, s2, f, waitMs) => (set != null ? set : (waitMs ? setTimeout(f, waitMs) : queueMicrotask(f), 
+  /* @__PURE__ */ new Set)).add(s2);
+
+  let runAndCaptureDeps = (f, deps, arg) => {
+    let prevDeps = curDeps;
+    curDeps = deps;
+    try {
+      return f(arg);
+    } catch (e) {
+      console.error(e);
+      return arg;
+    } finally {
+      curDeps = prevDeps;
+    }
+  };
+
+  let keepConnected = l => l.filter(b2 => {
+    var _a;
+    return (_a = b2._dom) == null ? void 0 : _a.isConnected;
   });
 
-  globalThis.addEventListener('hv-toggle-forge', () => {
-    toggleForge();
+  let addStatesToGc = d => statesToGc = addAndScheduleOnFirst(statesToGc, d, () => {
+    for (let s2 of statesToGc) s2._bindings = keepConnected(s2._bindings), s2._listeners = keepConnected(s2._listeners);
+    statesToGc = _undefined;
+  }, gcCycleInMs);
+
+  let stateProto = {
+    get val() {
+      var _a;
+      (_a = curDeps == null ? void 0 : curDeps._getters) == null ? void 0 : _a.add(this);
+      return this.rawVal;
+    },
+    get oldVal() {
+      var _a;
+      (_a = curDeps == null ? void 0 : curDeps._getters) == null ? void 0 : _a.add(this);
+      return this._oldVal;
+    },
+    set val(v) {
+      var _a;
+      (_a = curDeps == null ? void 0 : curDeps._setters) == null ? void 0 : _a.add(this);
+      if (v !== this.rawVal) {
+        this.rawVal = v;
+        this._bindings.length + this._listeners.length ? (derivedStates == null ? void 0 : derivedStates.add(this), 
+        changedStates = addAndScheduleOnFirst(changedStates, this, updateDoms)) : this._oldVal = v;
+      }
+    }
+  };
+
+  let state = initVal => ({
+    __proto__: stateProto,
+    rawVal: initVal,
+    _oldVal: initVal,
+    _bindings: [],
+    _listeners: []
   });
+
+  let bind = (f, dom) => {
+    let deps = {
+      _getters: /* @__PURE__ */ new Set,
+      _setters: /* @__PURE__ */ new Set
+    }, binding = {
+      f: f
+    }, prevNewDerives = curNewDerives;
+    curNewDerives = [];
+    let newDom = runAndCaptureDeps(f, deps, dom);
+    newDom = (newDom != null ? newDom : document).nodeType ? newDom : new Text(newDom);
+    for (let d of deps._getters) deps._setters.has(d) || (addStatesToGc(d), d._bindings.push(binding));
+    for (let l of curNewDerives) l._dom = newDom;
+    curNewDerives = prevNewDerives;
+    return binding._dom = newDom;
+  };
+
+  let derive = (f, s2 = state(), dom) => {
+    var _a;
+    let deps = {
+      _getters: /* @__PURE__ */ new Set,
+      _setters: /* @__PURE__ */ new Set
+    }, listener = {
+      f: f,
+      s: s2
+    };
+    listener._dom = (_a = dom != null ? dom : curNewDerives == null ? void 0 : curNewDerives.push(listener)) != null ? _a : alwaysConnectedDom;
+    s2.val = runAndCaptureDeps(f, deps, s2.rawVal);
+    for (let d of deps._getters) deps._setters.has(d) || (addStatesToGc(d), d._listeners.push(listener));
+    return s2;
+  };
+
+  let add = (dom, ...children) => {
+    for (let c of children.flat(Infinity)) {
+      let protoOfC = protoOf(c != null ? c : 0);
+      let child = protoOfC === stateProto ? bind(() => c.val) : protoOfC === funcProto ? bind(c) : c;
+      child != _undefined && dom.append(child);
+    }
+    return dom;
+  };
+
+  let tag = (ns, name, ...args) => {
+    var _a, _b, _c, _d;
+    let [{is: is, ...props}, ...children] = protoOf((_a = args[0]) != null ? _a : 0) === objProto ? args : [ {}, ...args ];
+    let dom = ns ? document.createElementNS(ns, name, {
+      is: is
+    }) : document.createElement(name, {
+      is: is
+    });
+    for (let [k, v] of Object.entries(props)) {
+      let getPropDescriptor = proto => {
+        var _a2;
+        return proto ? (_a2 = Object.getOwnPropertyDescriptor(proto, k)) != null ? _a2 : getPropDescriptor(protoOf(proto)) : _undefined;
+      };
+      let cacheKey = name + ',' + k;
+      let propSetter = (_d = propSetterCache[cacheKey]) != null ? _d : propSetterCache[cacheKey] = (_c = (_b = getPropDescriptor(protoOf(dom))) == null ? void 0 : _b.set) != null ? _c : 0;
+      let setter = k.startsWith('on') ? (v2, oldV) => {
+        let event = k.slice(2);
+        dom.removeEventListener(event, oldV);
+        dom.addEventListener(event, v2);
+      } : propSetter ? propSetter.bind(dom) : dom.setAttribute.bind(dom, k);
+      let protoOfV = protoOf(v != null ? v : 0);
+      k.startsWith('on') || protoOfV === funcProto && (v = derive(v), protoOfV = stateProto);
+      protoOfV === stateProto ? bind(() => (setter(v.val, v._oldVal), dom)) : setter(v);
+    }
+    return add(dom, children);
+  };
+
+  let handler = ns => ({
+    get: (_, name) => tag.bind(_undefined, ns, name)
+  });
+
+  let update = (dom, newDom) => newDom ? newDom !== dom && dom.replaceWith(newDom) : dom.remove();
+
+  let updateDoms = () => {
+    let iter = 0, derivedStatesArray = [ ...changedStates ].filter(s2 => s2.rawVal !== s2._oldVal);
+    do {
+      derivedStates = /* @__PURE__ */ new Set;
+      for (let l of new Set(derivedStatesArray.flatMap(s2 => s2._listeners = keepConnected(s2._listeners)))) derive(l.f, l.s, l._dom), 
+      l._dom = _undefined;
+    } while (++iter < 100 && (derivedStatesArray = [ ...derivedStates ]).length);
+    let changedStatesArray = [ ...changedStates ].filter(s2 => s2.rawVal !== s2._oldVal);
+    changedStates = _undefined;
+    for (let b2 of new Set(changedStatesArray.flatMap(s2 => s2._bindings = keepConnected(s2._bindings)))) update(b2._dom, bind(b2.f, b2._dom)), 
+    b2._dom = _undefined;
+    for (let s2 of changedStatesArray) s2._oldVal = s2.rawVal;
+  };
+
+  const van = {
+    tags: new Proxy(ns => new Proxy(tag, handler(ns)), handler())
+  };
+
+  const {a: a, aside: aside, audio: audio, b: b, blockquote: blockquote, br: br, button: button, canvas: canvas, code: code, datalist: datalist, dd: dd, details: details, dialog: dialog, div: div, dl: dl, dt: dt, em: em, fieldset: fieldset, figcaption: figcaption, figure: figure, footer: footer, form: form, h1: h1, h2: h2, h3: h3, h4: h4, h5: h5, h6: h6, header: header, hr: hr, i: i, iframe: iframe, img: img, input: input, label: label, legend: legend, li: li, main: main, nav: nav, ol: ol, optgroup: optgroup, option: option, p: p, pre: pre, progress: progress, ruby: ruby, s: s, script: script, search: search, section: section, select: select, small: small, source: source, span: span, strong: strong, style: style, sub: sub, summary: summary, sup: sup, table: table, tbody: tbody, td: td, textarea: textarea, tfoot: tfoot, th: th, thead: thead, tr: tr, u: u, ul: ul, video: video} = van.tags;
+
+  const defaultButtonClass = 'ml-5px cursor-pointer transition-color-200 border-none bg-transparent';
+
+  const createPercentButton = () => button({
+    type: 'button',
+    textContent: '%',
+    style: 'font-weight: bold;',
+    class: defaultButtonClass,
+    onclick: togglePercent
+  });
+
+  const createForgeButton = () => button({
+    type: 'button',
+    textContent: '🔨',
+    class: defaultButtonClass,
+    onclick: toggleForge
+  });
+
+  const createPinButton = () => button({
+    type: 'button',
+    textContent: '📌',
+    class: defaultButtonClass,
+    onclick: actionPinWindow
+  });
+
+  const excludeRegex = new RegExp([ '?s=Character&ss=eq', '?s=Battle&ss=iw', '?s=Bazaar&ss=am&screen=modify&' ].map(p2 => p2.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)).join('|'));
+
+  function injectCompare(container, quality) {
+    const showCompare = /^(?:\/isekai)?\/equip/.test(location.pathname) || !!(equipInfo == null ? void 0 : equipInfo.contains(container)) && location.search !== '' && !excludeRegex.test(location.search);
+    if (showCompare) {
+      const compare = div({
+        style: 'padding: 6px; border-top: 1px solid #A47C78;'
+      }, b('Compare: '), select({
+        id: 'hv-quality-compare',
+        onchange: e => {
+          renderEquip(container, e.target.value);
+        }
+      }, Object.keys(quality_configs).map(k => option({
+        value: k,
+        selected: k === quality
+      }, k))), isMobile ? [ createPercentButton(), createForgeButton() ] : []);
+      container.append(compare);
+    }
+  }
 
   const REGEX_VAL = /^(\d+(?:\.\d+)?)(?:\s+(\S.*))?$/;
 
@@ -173,30 +530,30 @@
   const REGEX_DAMAGE = /^(?:Magic|Attack|Void|Crushing|Piercing|Slashing) Damage/;
 
   function parseEquip(container) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
-    if ($(container, '.hv-lpr-avg')) return;
-    const eq = $(container, '.eq');
-    const eqt = $(container, '.eqt');
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    if (container.querySelector('.hv-lpr-avg')) return;
+    const eq = container.querySelector('.eq');
+    const eqt = container.querySelector('.eqt');
     if (!eq || !eqt) return;
     const title = (_a = container.firstElementChild) == null ? void 0 : _a.textContent.trim();
     if (!title) return;
-    const found = Object.entries(QUALITY_CONFIG).find(([key]) => title.startsWith(key));
+    const found = Object.entries(quality_configs).find(([key]) => title.startsWith(key));
     if (!found) return;
     const [quality, {range: range, cap: cap}] = found;
     const stats = [];
-    const rows = [ ...eq.querySelectorAll('.ex > div, .ep > div'), ...Array.from(eq.querySelectorAll('[title^="Base: "]')).filter(el2 => !el2.closest('.ex, .ep')) ];
+    const rows = [ ...eq.querySelectorAll('.ex > div, .ep > div'), ...Array.from(eq.querySelectorAll('[title^="Base: "]')).filter(el => !el.closest('.ex, .ep')) ];
     for (const row of rows) {
-      const span = row.querySelector('span');
-      if (!span) continue;
-      const match = REGEX_VAL.exec(span.textContent.trim());
+      const span2 = row.querySelector('span');
+      if (!span2) continue;
+      const match = REGEX_VAL.exec(span2.textContent.trim());
       if (!match) continue;
       const [_, valStr, typeText] = match;
       if (!valStr) continue;
       const name = typeText != null ? typeText : (_b = row.firstElementChild) == null ? void 0 : _b.textContent.trim();
       if (!name) continue;
       const baseMatch = (_c = row.getAttribute('title')) == null ? void 0 : _c.match(REGEX_BASE);
-      const prefixNode = span.previousSibling;
-      const suffixNode = (_e = (_d = span.parentNode) == null ? void 0 : _d.nextSibling) != null ? _e : null;
+      const prefixNode = span2.previousSibling;
+      const suffixNode = (_e = (_d = span2.parentNode) == null ? void 0 : _d.nextSibling) != null ? _e : null;
       stats.push({
         title: name,
         val: Number.parseFloat(valStr),
@@ -206,18 +563,17 @@
         prefix: (prefixNode == null ? void 0 : prefixNode.nodeType) === 3 ? prefixNode.textContent : '',
         suffix: (_f = suffixNode == null ? void 0 : suffixNode.textContent) != null ? _f : null,
         typeText: typeText != null ? typeText : null,
-        _el: span,
+        _el: span2,
         _preNode: prefixNode,
         _sufNode: suffixNode
       });
     }
-    const avg = el('div', {
-      class: 'hv-lpr-avg',
-      style: container.closest('#popup_box') ? 'position: absolute; bottom: 4px; left: 0; right: 0; text-align :center;' : void 0
+    const avg = div({
+      class: `hv-lpr-avg p-2px text-12px font-bold ${container.closest('#popup_box') ? ' absolute bottom-1 inset-x-0 text-center' : ''}`
     });
     container.append(avg);
     const tierMatch = REGEX_TIER.exec(eqt.textContent);
-    const equip = {
+    return {
       title: title,
       quality: quality,
       range: range,
@@ -237,177 +593,14 @@
         forge_max: cap
       }
     };
-    equipMap.set(container, equip);
-    const excludePatterns = [ '?s=Character&ss=eq', '?s=Battle&ss=iw', '?s=Bazaar&ss=am&screen=modify&' ];
-    const showCompare = /^(?:\/isekai)?\/equip/.test(location.pathname) || ((_i = document.getElementById('equipinfo')) == null ? void 0 : _i.contains(container)) && location.search !== '' && excludePatterns.every(pattern => !location.search.includes(pattern));
-    let compareQuality = null;
-    if (showCompare) {
-      const initQuality = quality;
-      if (initQuality !== quality) {
-        compareQuality = initQuality;
-      }
-      const select = el('select', {
-        id: 'hv-quality-compare',
-        onchange: () => {
-          renderEquip(container, select.value);
-        }
-      }, Object.keys(QUALITY_CONFIG).map(k => el('option', {
-        value: k,
-        selected: k === initQuality
-      }, [ k ])));
-      container.append(el('div', {
-        style: 'padding: 6px; border-top: 1px solid #A47C78;'
-      }, [ el('b', {}, [ 'Compare: ' ]), select, ...globalState.isMobile ? [ UI_BUTTONS.PERCENT, UI_BUTTONS.FORGE ] : [] ]));
-    }
-    renderEquip(container, compareQuality);
   }
 
-  const charmExclusiveBonus = /* @__PURE__ */ new Set([ 'HP Bonus', 'MP Bonus', 'Counter-parry' ]);
-
-  function renderEquip(container, compareQuality = null) {
-    const equip = equipMap.get(container);
+  function initEquip(container) {
+    const equip = parseEquip(container);
     if (!equip) return;
-    const {showPercent: showPercent, showMaxForge: showMaxForge} = globalState;
-    if (equip.type === 'Soulbound') {
-      const {tier_up: up, tier_iw: iw, tier_max: max2} = equip;
-      if (showMaxForge && (max2 - up > 0 || max2 - iw > 0)) {
-        const diffX = max2 - up > 0 ? `${up}<span class="hv-txt-green">+${max2 - up}</span>` : max2;
-        const diffY = max2 - iw > 0 ? `${iw}<span class="hv-txt-green">+${max2 - iw}</span>` : max2;
-        equip._eqt.innerHTML = `Tier ${diffX} / ${diffY} / ${max2}`;
-      } else {
-        equip._eqt.textContent = `Tier ${up} / ${iw} / ${max2}`;
-      }
-    }
-    let totalPercent = 0;
-    let statCount = 0;
-    const [min, max] = compareQuality ? QUALITY_CONFIG[compareQuality].range : equip.range;
-    const forge_current = equip.type === 'Soulbound' ? equip.tier_up + equip.tier_iw : 0;
-    const getColor = (percent, max2 = 70, min2 = 30) => percent >= max2 ? 'hv-txt-green' : percent <= min2 ? 'hv-txt-red' : 'hv-txt-mid';
-    for (const stat of equip.stats) {
-      const el2 = stat._el;
-      el2.classList.remove('hv-txt-red', 'hv-txt-green', 'hv-txt-mid');
-      let percent = null;
-      if (stat.base !== null) {
-        const span = max - min || 30;
-        percent = Number.parseFloat(((stat.base - (max - span)) / span * 100).toFixed(1));
-        totalPercent += percent;
-        statCount++;
-      }
-      const isForgeMode = showMaxForge && equip.forge_max > forge_current && !charmExclusiveBonus.has(stat.title);
-      const isPercentMode = showPercent && !isForgeMode && percent !== null;
-      const hideSurrounding = isForgeMode || isPercentMode;
-      if (stat._preNode) {
-        stat._preNode.textContent = hideSurrounding ? '' : stat.prefix;
-      }
-      if (stat._sufNode && !stat.typeText) {
-        stat._sufNode.textContent = hideSurrounding ? '' : stat.suffix;
-      }
-      const typeText = stat.typeText ? ` ${stat.typeText}` : '';
-      if (isForgeMode) {
-        const maxVal = stat.val * (1 + equip.forge_max * stat.rate / 100) / (1 + forge_current * stat.rate / 100);
-        const gainText = Math.round((maxVal - stat.val) * 100) / 100;
-        el2.innerHTML = `${stat.valStr}<span class="hv-txt-green">+${gainText}</span>${typeText}`;
-      } else if (isPercentMode && percent !== null) {
-        el2.textContent = `${percent}%${typeText}`;
-        el2.classList.add(getColor(percent));
-      } else {
-        el2.textContent = `${stat.valStr}${typeText}`;
-      }
-    }
-    if (statCount > 0) {
-      const avg = Number.parseFloat((totalPercent / statCount).toFixed(1));
-      const mode = showMaxForge ? 'Max Forged' : showPercent ? 'Percentage' : 'Value';
-      equip._avg.innerHTML = `<div class="${getColor(avg, 60, 40)}">Avg: ${avg}%</div><div style="font-size: 10px;" title="Hotkeys: f, w">Mode: ${mode}</div>`;
-    } else {
-      equip._avg.textContent = '';
-    }
-  }
-
-  const hvCss = '.hv-lpr-avg{padding:2px;font-size:12px;font-weight:700}.hv-txt-red{color:#f03939}.hv-txt-green{color:#0ab844}.hv-txt-mid{color:#1d3271}';
-
-  importCSS(hvCss);
-
-  const REGEX_TARGET = /^https?:\/\/(alt\.)?hentaiverse\.org\/((isekai\/)?equip|r\/)/;
-
-  function isValidKey$1(e) {
-    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return false;
-    const target = e.target;
-    if (!target) return false;
-    const tag = target.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) return false;
-    return true;
-  }
-
-  let popup = null;
-
-  function renderAll() {
-    if ((popup == null ? void 0 : popup.style.visibility) === 'visible') {
-      renderEquip(popup);
-    }
-    for (const el2 of $$('.showequip')) {
-      const select = el2.querySelector('select');
-      renderEquip(el2, select ? select.value : null);
-    }
-  }
-
-  function initHv() {
-    const observer = new MutationObserver(mutations => {
-      for (const m of mutations) {
-        if (m.type === 'childList') {
-          for (const node of Array.from(m.addedNodes)) {
-            if (!(node instanceof HTMLElement)) continue;
-            if (!node.classList.contains('showequip')) continue;
-            parseEquip(node);
-          }
-        } else if (m.type === 'attributes' && m.attributeName === 'style') {
-          const target = m.target;
-          if (!(target instanceof HTMLElement)) continue;
-          if (target.style.visibility === 'visible') {
-            parseEquip(target);
-          }
-        }
-      }
-    });
-    popup = document.getElementById('popup_box');
-    if (popup) observer.observe(popup, {
-      attributes: true
-    });
-    const equipInfo = document.getElementById('equipinfo');
-    if (equipInfo) observer.observe(equipInfo, {
-      childList: true
-    });
-    for (const el2 of $$('.showequip')) {
-      parseEquip(el2);
-    }
-    globalThis.addEventListener('hv-state-change', () => {
-      renderAll();
-    });
-    document.addEventListener('keydown', e => {
-      if (!isValidKey$1(e)) return;
-      const key = e.key.toLowerCase();
-      switch (key) {
-       case CONFIGS.key_toggle:
-        e.preventDefault();
-        globalThis.dispatchEvent(new CustomEvent('hv-toggle-percent'));
-        break;
-
-       case CONFIGS.key_forge:
-        e.preventDefault();
-        globalThis.dispatchEvent(new CustomEvent('hv-toggle-forge'));
-        break;
-
-       case CONFIGS.key_link:
-        if (!REGEX_TARGET.test(location.href)) return;
-        {
-          const first = $$('.showequip')[0];
-          if (!first) return;
-          const equip = equipMap.get(first);
-          if (!equip) return;
-          globalThis.prompt('Forum Link:', `[url=${location.href}]${equip.title}[/url]`);
-        }
-        break;
-      }
-    }, true);
+    equipMap.set(container, equip);
+    injectCompare(container, equip.quality);
+    renderEquip(container);
   }
 
   const CACHE_PREFIX = 'HvPerc_';
@@ -436,72 +629,99 @@
     }
   };
 
-  let curLink = null;
-
-  const fetchData = url => GM_xmlhttpRequest({
-    method: 'GET',
-    url: url.replace(/^http:/, 'https:'),
-    headers: {
-      Origin: 'https://hentaiverse.org'
-    },
-    onload: res => {
-      var _a;
-      try {
-        const doc = (new DOMParser).parseFromString(res.responseText, 'text/html');
-        (_a = doc.querySelector('div[style*="border-top"] p')) == null ? void 0 : _a.remove();
-        const content = doc.querySelector('.showequip, #showequip');
-        if (!content) {
-          renderTooltip({
-            err: doc.body.textContent || ''
-          }, url);
-          return;
-        }
-        const titleDiv = content.firstElementChild;
-        if (titleDiv && !titleDiv.querySelector('a')) {
-          const link = el('a', {
-            href: url,
-            target: '_blank',
-            style: 'color: inherit; text-decoration: none; cursor: pointer'
-          }, []);
-          link.append(...titleDiv.childNodes);
-          titleDiv.replaceChildren(link);
-        }
-        setCache(url, content.outerHTML);
-        if ((curLink == null ? void 0 : curLink.href) === url) {
-          renderTooltip({
-            html: content.outerHTML
-          }, url);
-        }
-      } catch (err) {
-        console.error('Failed to parse tooltip response', err);
-        renderTooltip({
-          err: 'Parse Error'
-        }, url);
-      }
-    },
-    onerror: () => {
-      renderTooltip({
-        err: 'Network Error'
-      }, url);
+  function parseRawHtml(html, url) {
+    var _a;
+    const doc = (new DOMParser).parseFromString(html, 'text/html');
+    (_a = doc.querySelector('div[style*="border-top"] p')) == null ? void 0 : _a.remove();
+    const content = doc.querySelector('.showequip, #showequip');
+    if (!content) {
+      throw new Error(doc.body.textContent);
     }
-  });
+    const titleDiv = content.firstElementChild;
+    if (titleDiv) {
+      const link = a({
+        href: url,
+        target: '_blank',
+        class: 'color-inherit decoration-none cursor-pointer'
+      }, Array.from(titleDiv.childNodes));
+      titleDiv.replaceChildren(link);
+    }
+    return content.outerHTML;
+  }
+
+  let zIndex = 2e4;
+
+  function createPin(tip2, url) {
+    var _a;
+    const existingWin = document.querySelector(`.hv-pin-box[data-url="${url}"]`);
+    if (existingWin) return;
+    const content = div({
+      class: 'overflow-auto max-h-80vh',
+      innerHTML: (_a = getCache(url)) != null ? _a : tip2.innerHTML
+    });
+    const eq = content.firstElementChild;
+    if (!eq) return;
+    initEquip(eq);
+    if (isMobile) {
+      content.append(createPercentButton(), createForgeButton());
+    }
+    const handleDrag = e => {
+      if (e.button !== 0 || !e.isPrimary) return;
+      e.preventDefault();
+      pinWin.style.zIndex = String(++zIndex);
+      const target = e.currentTarget;
+      target.setPointerCapture(e.pointerId);
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const {left: left, top: top} = pinWin.getBoundingClientRect();
+      const onMove = ev => {
+        pinWin.style.left = `${left + (ev.clientX - startX)}px`;
+        pinWin.style.top = `${top + (ev.clientY - startY)}px`;
+      };
+      const onUp = ev => {
+        target.removeEventListener('pointermove', onMove);
+        target.removeEventListener('pointerup', onUp);
+        target.releasePointerCapture(ev.pointerId);
+      };
+      target.addEventListener('pointermove', onMove);
+      target.addEventListener('pointerup', onUp);
+    };
+    const pinWin = div({
+      class: `hv-pin-box pt-0! flex-col border:solid border:#5c0d11 shadow hv-tip${url.includes('/isekai/') ? '' : ' hv-tip-persistent'}`,
+      'data-url': url,
+      style: `top: ${tip2.style.top}; left: ${tip2.style.left}; z-index:${++zIndex};`
+    }, div({
+      class: 'flex-between py-3px px-6px font-bold bg-#5c0d11 text-#edebdf cursor-move select-none touch-none',
+      onpointerdown: handleDrag
+    }, span('Pinned'), span({
+      textContent: '[X]',
+      class: 'hover:text-red cursor-pointer font-mono ml-2',
+      onclick: () => {
+        pinWin.remove();
+      },
+      onpointerdown: e => {
+        e.stopPropagation();
+      }
+    })), content);
+    document.body.append(pinWin);
+  }
 
   let tip = null;
 
-  let hoverTimer = null;
+  let curLink = null;
+
+  let showTimer = null;
 
   let hideTimer = null;
 
-  let isTouch = false;
-
-  const clearHoverTimer = () => {
-    if (hoverTimer) {
-      globalThis.clearTimeout(hoverTimer);
-      hoverTimer = null;
+  const clearShowTimer = () => {
+    if (showTimer) {
+      globalThis.clearTimeout(showTimer);
+      showTimer = null;
     }
   };
 
-  const cleanHideTimer = () => {
+  const clearHideTimer = () => {
     if (hideTimer) {
       globalThis.clearTimeout(hideTimer);
       hideTimer = null;
@@ -512,239 +732,244 @@
     if (tip) tip.style.display = 'none';
   };
 
-  const renderTooltip = (data, _url = '') => {
-    if (!tip) {
-      tip = el('div', {
-        style: 'display: none; z-index: 10000;',
-        class: _url.includes('/isekai/') ? 'hv-tip' : 'hv-tip hv-tip-persistent',
-        onmouseenter: () => {
-          cleanHideTimer();
-        },
-        onmouseleave: () => {
-          hideTimer = globalThis.setTimeout(() => {
-            curLink = null;
-            hideTip();
-          }, 200);
+  let abortCtrl = null;
+
+  const clearAbortCtrl = () => {
+    if (abortCtrl) {
+      abortCtrl.abort();
+      abortCtrl = null;
+    }
+  };
+
+  const renderContent = (link, html) => {
+    if (!tip || link !== curLink) return;
+    tip.innerHTML = html;
+    const eq = tip.firstElementChild;
+    if (eq) {
+      initEquip(eq);
+      if (isMobile) {
+        tip.append(createPercentButton(), createForgeButton(), createPinButton());
+      }
+    }
+    tip.style.display = 'block';
+    const rect = link.getBoundingClientRect();
+    const tRect = tip.getBoundingClientRect();
+    let pos;
+    if (isMobile) {
+      pos = getMobileTooltipPosition(rect, tRect);
+    } else {
+      let top = rect.top + 10;
+      let left = rect.right + 10;
+      if (left + tRect.width > globalThis.innerWidth) {
+        left = rect.left - tRect.width - 10;
+        if (left < 0) {
+          left = 5;
         }
+      }
+      if (top + tRect.height > globalThis.innerHeight) {
+        top = top < 0 ? rect.bottom + 10 : globalThis.innerHeight - tRect.height - 10;
+      }
+      pos = {
+        left: left,
+        top: top
+      };
+    }
+    tip.style.top = `${pos.top}px`;
+    tip.style.left = `${pos.left}px`;
+  };
+
+  const renderTip = link => {
+    if ((tip == null ? void 0 : tip.contains(link)) || link.closest('.hv-pin-box')) return;
+    const url = link.href.replace(/^http:/, 'https:');
+    if (!REGEX_TARGET.test(url)) return;
+    clearAbortCtrl();
+    clearShowTimer();
+    clearHideTimer();
+    curLink = link;
+    if (!tip) {
+      tip = div({
+        style: 'display: none;',
+        class: `hv-tip z-10000 ${url.includes('/isekai/') ? '' : ' hv-tip-persistent'}`
       });
       document.body.append(tip);
     }
-    if ('err' in data) {
-      tip.innerHTML = `<div class="hv-err">${data.err}</div>`;
+    const cached = getCache(url);
+    if (cached) {
+      renderContent(link, cached);
     } else {
-      tip.innerHTML = data.html;
-      const eq = tip.firstElementChild;
-      if (!eq) return;
-      if (_url.includes('/isekai/')) {
-        parseEquip(eq);
-        if (globalState.isMobile) {
-          const pinBtn = el('button', {
-            type: 'button',
-            style: 'margin-left: 5px; cursor: pointer !important; border: none; background: transparent;',
-            onclick: () => {
-              actionPinWindow();
-            }
-          }, [ '📌' ]);
-          eq.append(UI_BUTTONS.PERCENT, UI_BUTTONS.FORGE, pinBtn);
+      showTimer = setTimeout(async () => {
+        if (!tip) return;
+        abortCtrl = new AbortController;
+        try {
+          const {responseText: responseText} = await GM_Request({
+            url: url
+          }, abortCtrl.signal);
+          if (curLink !== link) return;
+          const html = parseRawHtml(responseText, url);
+          setCache(url, html);
+          renderContent(link, html);
+        } catch (error) {
+          if (curLink !== link || error instanceof Error && error.message === 'Aborted') return;
+          tip.innerHTML = `<div class="p-10px color-red font-bold"> ${error instanceof Error ? error.message : 'Unknown error'}</div>`;
         }
-      }
+      }, 200);
     }
-    if (!curLink) return;
-    tip.style.display = 'block';
-    const rect = curLink.getBoundingClientRect();
-    const tRect = tip.getBoundingClientRect();
-    let top;
-    let left;
-    if (isTouch) {
-      top = rect.top - tRect.height - 20;
-      left = (globalThis.innerWidth - tRect.width) / 2;
-    } else {
-      top = rect.top + 10;
-      left = rect.right + 10;
-    }
-    if (left + tRect.width > globalThis.innerWidth) {
-      left = rect.left - tRect.width - 10;
-      if (left < 0) {
-        left = 5;
-      }
-    }
-    if (top + tRect.height > globalThis.innerHeight) {
-      top = top < 0 ? rect.bottom + 10 : globalThis.innerHeight - tRect.height - 10;
-    }
-    tip.style.top = `${Math.max(5, top)}px`;
-    tip.style.left = `${Math.max(5, left)}px`;
   };
 
-  let zIndex = 10002;
-
-  function isValidKey(e) {
-    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return false;
-    const target = e.target;
-    if (!target) return false;
-    const tag = target.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) return false;
-    return true;
-  }
-
-  function actionPinWindow() {
-    var _a;
-    if (!tip || tip.style.display === 'none' || !curLink) return;
-    const url = curLink.href;
-    if (document.querySelector(`.hv-pin-box[data-url="${url}"]`)) return;
-    hideTip();
-    const pinWin = el('div', {
-      class: `hv-pin-box hv-tip${url.includes('/isekai/') ? '' : ' hv-tip-persistent'}`,
-      dataset: {
-        url: url
-      },
-      style: `position:fixed;\n            top: ${tip.style.top}; left: ${tip.style.left};\n            z-index:${++zIndex};`,
-      onmousedown: () => {
-        pinWin.style.zIndex = String(++zIndex);
-      },
-      ontouchstart: () => {
-        pinWin.style.zIndex = String(++zIndex);
-      }
-    });
-    const closeBtn = el('span', {
-      class: 'hv-pin-close',
-      style: 'cursor: pointer; font-family: monospace;',
-      onclick: () => {
-        pinWin.remove();
-      },
-      onpointerdown: e => {
-        e.stopPropagation();
-      }
-    }, [ '[X]' ]);
-    const header = el('div', {
-      class: 'hv-pin-header',
-      style: 'touch-action: none; user-select: none;',
-      onpointerdown: e => {
-        if (e.button !== 0 || !e.isPrimary) return;
-        e.preventDefault();
-        const target = e.currentTarget;
-        target.setPointerCapture(e.pointerId);
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const {left: left, top: top} = pinWin.getBoundingClientRect();
-        const onMove = ev => {
-          pinWin.style.left = `${left + (ev.clientX - startX)}px`;
-          pinWin.style.top = `${top + (ev.clientY - startY)}px`;
-        };
-        const onUp = ev => {
-          target.removeEventListener('pointermove', onMove);
-          target.removeEventListener('pointerup', onUp);
-          target.releasePointerCapture(ev.pointerId);
-        };
-        target.addEventListener('pointermove', onMove);
-        target.addEventListener('pointerup', onUp);
-      }
-    }, [ el('span', {}, [ 'Pinned' ]), closeBtn ]);
-    const content = el('div', {
-      class: 'hv-pin-body',
-      innerHTML: (_a = getCache(url)) != null ? _a : tip.innerHTML
-    }, []);
-    const eq = content.firstElementChild;
-    if (!eq) return;
-    parseEquip(eq);
-    if (globalState.isMobile) {
-      content.append(UI_BUTTONS.PERCENT, UI_BUTTONS.FORGE);
-    }
-    pinWin.append(header, content);
-    document.body.append(pinWin);
-  }
-
-  function initForums() {
-    document.addEventListener('mouseover', e => {
-      if (isTouch) return;
+  const initTipEvents = () => {
+    document.addEventListener('pointerover', e => {
+      if (e.pointerType === 'touch') return;
       const target = e.target;
-      const link = target.closest('a');
-      if (!link) return;
-      if (link.closest('.hv-tip') || link.closest('.hv-pin-box') || link.closest('.hv-tip-persistent')) {
+      if (tip == null ? void 0 : tip.contains(target)) {
+        clearHideTimer();
         return;
       }
-      const url = link.href.replace(/^http:/, 'https:');
-      if (!REGEX_TARGET.test(url)) return;
-      cleanHideTimer();
-      clearHoverTimer();
-      hideTip();
-      curLink = link;
-      const cached = getCache(url);
-      if (cached) {
-        renderTooltip({
-          html: cached
-        }, url);
-      } else {
-        hoverTimer = globalThis.setTimeout(() => {
-          fetchData(url);
-        }, 200);
-      }
-    });
-    document.addEventListener('mouseout', e => {
-      if (!curLink || isTouch) return;
-      const related = e.relatedTarget;
-      if (related && (curLink.contains(related) || (tip == null ? void 0 : tip.contains(related)))) return;
-      const link = e.target.closest('a');
-      if (link === curLink) {
-        clearHoverTimer();
-        hideTimer = globalThis.setTimeout(() => {
-          curLink = null;
-          hideTip();
-        }, 200);
-      }
-    });
-    document.addEventListener('touchstart', e => {
-      isTouch = true;
-      const target = e.target;
-      if (tip && tip.style.display !== 'none' && !tip.contains(target)) {
-        hideTip();
-      }
       const link = target.closest('a');
       if (!link) return;
-      const url = link.href.replace(/^http:/, 'https:');
-      if (!REGEX_TARGET.test(url)) return;
-      curLink = link;
-      if (hoverTimer) globalThis.clearTimeout(hoverTimer);
-      hoverTimer = globalThis.setTimeout(() => {
-        const cached = getCache(url);
-        if (cached) {
-          renderTooltip({
-            html: cached
-          }, url);
-        } else {
-          fetchData(url);
+      if (link === curLink) {
+        clearHideTimer();
+        return;
+      }
+      renderTip(link);
+    });
+    document.addEventListener('pointerout', e => {
+      if (!curLink || !tip) return;
+      if (e.pointerType === 'touch') return;
+      const target = e.target;
+      if (!tip.contains(target) && !curLink.contains(target)) return;
+      const related = e.relatedTarget;
+      if (tip.contains(related) || curLink.contains(related)) return;
+      clearAbortCtrl();
+      clearShowTimer();
+      clearHideTimer();
+      hideTimer = setTimeout(() => {
+        curLink = null;
+        hideTip();
+      }, 200);
+    });
+  };
+
+  function actionPinWindow() {
+    if (!tip || tip.style.display === 'none' || !curLink) return;
+    createPin(tip, curLink.href);
+    hideTip();
+  }
+
+  let longPressTimer = null;
+
+  let isLongPressTriggered = false;
+
+  const clearLongPressTimer = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
+
+  function initMobileEvents() {
+    document.addEventListener('touchstart', e => {
+      const target = e.target;
+      const link = target.closest('a');
+      clearLongPressTimer();
+      isLongPressTriggered = false;
+      if (!link) {
+        if (tip && tip.style.display !== 'none' && !tip.contains(target)) {
+          tip.style.display = 'none';
         }
+        return;
+      }
+      longPressTimer = setTimeout(() => {
+        isLongPressTriggered = true;
+        renderTip(link);
       }, 500);
     }, {
       passive: true
     });
-    document.addEventListener('touchend', clearHoverTimer);
-    document.addEventListener('touchmove', clearHoverTimer);
+    document.addEventListener('touchmove', clearLongPressTimer, {
+      passive: true
+    });
+    document.addEventListener('touchend', clearLongPressTimer);
     document.addEventListener('contextmenu', e => {
-      if (isTouch) {
-        const target = e.target;
-        const link = target.closest('a');
-        if (link && REGEX_TARGET.test(link.href.replace(/^http:/, 'https:'))) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
+      console.log('contextmenu', isLongPressTriggered);
+      if (!isLongPressTriggered) return;
+      const target = e.target;
+      const link = target.closest('a');
+      if (link && REGEX_TARGET.test(link.href) || (tip == null ? void 0 : tip.contains(target))) {
+        e.preventDefault();
+        e.stopPropagation();
       }
     });
+  }
+
+  function getMobileTooltipPosition(targetRect, tipRect) {
+    const {innerWidth: innerWidth, innerHeight: innerHeight} = globalThis;
+    let top = targetRect.top - tipRect.height - 20;
+    let left = (innerWidth - tipRect.width) / 2;
+    if (left + tipRect.width > innerWidth) {
+      left = targetRect.left - tipRect.width - 10;
+      if (left < 0) left = 5;
+    }
+    if (top + tipRect.height > innerHeight) {
+      top = top < 0 ? targetRect.bottom + 10 : innerHeight - tipRect.height - 10;
+    }
+    return {
+      top: Math.max(5, top),
+      left: Math.max(5, left)
+    };
+  }
+
+  function initForums() {
+    initTipEvents();
+    if (isMobile) {
+      initMobileEvents();
+    }
     document.addEventListener('keydown', e => {
       if (!isValidKey(e)) return;
       const key = e.key.toLowerCase();
-      if (key === CONFIGS.key_pin) {
+      if (key === keyboard_configs.key_pin) {
         actionPinWindow();
-      } else if (key === CONFIGS.key_delete) {
-        for (const w of $$('.hv-pin-box:hover')) {
+      } else if (key === keyboard_configs.key_delete) {
+        for (const w of document.querySelectorAll('.hv-pin-box:hover')) {
           w.remove();
         }
       }
     });
   }
 
+  function initHv() {
+    for (const el of document.querySelectorAll('.showequip')) {
+      initEquip(el);
+    }
+    document.addEventListener('keydown', e => {
+      if (!isValidKey(e)) return;
+      switch (e.key.toLowerCase()) {
+       case keyboard_configs.key_toggle:
+        e.preventDefault();
+        togglePercent();
+        break;
+
+       case keyboard_configs.key_forge:
+        e.preventDefault();
+        toggleForge();
+        break;
+
+       case keyboard_configs.key_link:
+        if (!REGEX_TARGET.test(location.href)) return;
+        {
+          const first = document.querySelectorAll('.showequip')[0];
+          if (!first) return;
+          const equip = equipMap.get(first);
+          if (!equip) return;
+          globalThis.prompt('Forum Link:', `[url=${location.href}]${equip.title}[/url]`);
+        }
+        break;
+      }
+    }, true);
+  }
+
   initHv();
 
-  if (!location.hostname.includes('hentaiverse.org')) {
+  if (location.hostname.includes('forums.e-hentai.org')) {
     initForums();
   }
 
