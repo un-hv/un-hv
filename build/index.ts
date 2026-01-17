@@ -9,8 +9,12 @@ interface DefineMonkeyConfigOptions {
   version: string;
   description: string;
   match: string[];
+  exclude?: string[];
   connect?: string[];
   icon?: string;
+  runAt?: 'document-start' | 'document-end' | 'document-idle';
+  tag?: string[];
+  noframes?: boolean;
   userscriptOverrides?: MonkeyUserScript;
   viteOverrides?: UserConfig;
 }
@@ -21,8 +25,12 @@ export function createMonkeyConfig({
   version,
   description,
   match,
+  exclude = [],
   connect = [],
   icon = 'https://e-hentai.org/favicon.ico',
+  runAt = 'document-idle',
+  tag = [],
+  noframes = false,
   userscriptOverrides = {},
   viteOverrides = {},
 }: DefineMonkeyConfigOptions) {
@@ -66,7 +74,11 @@ export function createMonkeyConfig({
           copyright: `${new Date().getFullYear()}, un-hv`,
           icon,
           match,
+          exclude,
           connect,
+          'run-at': runAt,
+          tag,
+          noframes,
           homepage: 'https://github.com/un-hv/un-hv',
           supportURL: 'https://forums.e-hentai.org/index.php?showtopic=290597',
           downloadURL: distUrl,
