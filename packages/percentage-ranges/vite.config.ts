@@ -11,4 +11,5 @@ export default createMonkeyConfig({
     'https://forums.e-hentai.org/*',
   ],
   connect: ['hentaiverse.org', 'alt.hentaiverse.org'],
+  runAt: 'document-end',
 });

@@ -1,9 +1,11 @@
-import { CONFIGS } from './config';
+// eslint-disable-next-line import-x/no-unresolved
+import 'virtual:uno.css';
+
 import { initForums } from './forums';
 import { initHv } from './hv';
 
 initHv();
 
-if (CONFIGS.enable_on_forums && !location.hostname.includes('hentaiverse.org')) {
+if (location.hostname.includes('forums.e-hentai.org')) {
   initForums();
 }

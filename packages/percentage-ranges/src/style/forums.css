@@ -106,37 +106,3 @@
 .hv-tip a:active {
   color: #5c0d11;
 }
-.hv-err {
-  padding: 10px;
-  color: #ff2323;
-  font-weight: bold;
-}
-.hv-pin-box {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #5c0d11;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  z-index: 10001;
-  padding: 0;
-}
-.hv-pin-header {
-  background-color: #5c0d11;
-  color: #edebdf;
-  padding: 3px 6px;
-  cursor: move;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  font-size: 10px;
-  font-weight: bold;
-  user-select: none;
-}
-.hv-pin-close:hover {
-  color: #ff6666;
-}
-.hv-pin-body {
-  padding: 4px 0;
-  overflow: auto;
-  max-height: 80vh;
-}

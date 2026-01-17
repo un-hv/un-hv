@@ -1,14 +1,4 @@
-type Quality =
-  | 'Peerless'
-  | 'Legendary'
-  | 'Magnificent'
-  | 'Exquisite'
-  | 'Superior'
-  | 'Average'
-  | 'Fair'
-  | 'Crude';
-
-interface Stat {
+export interface Stat {
   title: string;
   val: number;
   valStr: string;
@@ -46,4 +36,4 @@ interface TradeableItem extends EquipBase {
   level: number;
 }
 
-type EquipData = SoulboundItem | TradeableItem;
+export type EquipData = SoulboundItem | TradeableItem;
