@@ -1,8 +1,8 @@
 import { isMobile } from 'common/mobile';
 
+import { createForgeButton, createPercentButton } from '../mobile';
 import { equipInfo } from '../observe';
 import { quality_configs } from './config';
-import { createForgeButton, createPercentButton } from '../mobile';
 import { renderEquip } from './render';
 
 const excludeRegex = new RegExp(
