@@ -29,6 +29,262 @@
 
   importCSS(' .flex-between{display:flex;align-items:center;justify-content:space-between}.flex-col{display:flex;flex-direction:column}.visible{visibility:visible}.absolute{position:absolute}.inset-x-0{left:0;right:0}.bottom-1{bottom:.25rem}.z-10000,[z-10000=""]{z-index:10000}.ml-2{margin-left:.5rem}.ml-5px{margin-left:5px}.block{display:block}.max-h-80vh{max-height:80vh}.cursor-pointer{cursor:pointer}.cursor-move{cursor:move}.touch-none{touch-action:none}.select-none{-webkit-user-select:none;user-select:none}.overflow-auto{overflow:auto}.border-none{border-style:none}.bg-\\#5c0d11{--un-bg-opacity:1;background-color:rgb(92 13 17 / var(--un-bg-opacity))}.bg-transparent{background-color:transparent}.p-10px{padding:10px}.p-2px{padding:2px}.px,[px=""]{padding-left:1rem;padding-right:1rem}.px-6px{padding-left:6px;padding-right:6px}.py-3px{padding-top:3px;padding-bottom:3px}.pt-0\\!{padding-top:0!important}.text-center{text-align:center}.text-10px{font-size:10px}.text-12px{font-size:12px}.text-\\#0ab844{--un-text-opacity:1;color:rgb(10 184 68 / var(--un-text-opacity))}.text-\\#1d3271{--un-text-opacity:1;color:rgb(29 50 113 / var(--un-text-opacity))}.text-\\#edebdf{--un-text-opacity:1;color:rgb(237 235 223 / var(--un-text-opacity))}.text-\\#f03939{--un-text-opacity:1;color:rgb(240 57 57 / var(--un-text-opacity))}.hover\\:text-red:hover,.color-red{--un-text-opacity:1;color:rgb(248 113 113 / var(--un-text-opacity))}.color-inherit{color:inherit}.font-bold{font-weight:700}.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace}.decoration-none{text-decoration:none}.shadow{--un-shadow:var(--un-shadow-inset) 0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),var(--un-shadow-inset) 0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.transition-color-200{transition-property:color;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.2s} ');
 
+  var p$1 = e2 => !!e2;
+
+  var n = e2 => Array.from(new Set(e2));
+
+  var Nr = (e2, o, ...s2) => {
+    for (let i2 of s2) {
+      let t2 = l(o, i2);
+      if (t2) return t2;
+    }
+    return e2;
+  }, l = (e2, o) => {
+    let s2 = o().map(r => r.toLowerCase()), i2 = n(s2.flatMap(r => [ r, r.split('-')[0] ])), t2 = e2.map(r => r.toLowerCase());
+    return i2.map(r => {
+      let c = t2.findIndex(x => x === r);
+      return c >= 0 && e2[c];
+    }).find(p$1);
+  };
+
+  var e = () => (navigator == null ? void 0 : navigator.languages) || [];
+
+  const removeEmptyValues = object => Object.fromEntries(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Object.entries(object).map(([key, value]) => key !== 'i' && value && value != '0' && [ key, value ]).filter(Boolean));
+
+  const trimAllValues = part => Object.fromEntries(Object.keys(part).map(key => {
+    const val = part[key];
+    return [ key, Array.isArray(val) ? val.map(v => v === null || v === void 0 ? void 0 : v.trim()) : val === !!val ? val : val === null || val === void 0 ? void 0 : val.trim() ];
+  }));
+
+  const parseArgumentPart = text => {
+    const [keyPart = '', ...formatterKeys] = text.split('|');
+    const [keyWithoutType = '', type] = keyPart.split(':');
+    const [key, isOptional] = keyWithoutType.split('?');
+    return {
+      k: key,
+      i: type,
+      n: isOptional === '',
+      f: formatterKeys
+    };
+  };
+
+  const isBasicPluralPart = part => !!(part.o || part.r);
+
+  const parsePluralPart = (content, lastAccessor) => {
+    let [key, values] = content.split(':');
+    if (!values) {
+      values = key;
+      key = lastAccessor;
+    }
+    const entries = values.split('|');
+    const [zero, one, two, few, many, rest] = entries;
+    const nrOfEntries = entries.filter(entry => entry !== void 0).length;
+    if (nrOfEntries === 1) {
+      return {
+        k: key,
+        r: zero
+      };
+    }
+    if (nrOfEntries === 2) {
+      return {
+        k: key,
+        o: zero,
+        r: one
+      };
+    }
+    if (nrOfEntries === 3) {
+      return {
+        k: key,
+        z: zero,
+        o: one,
+        r: two
+      };
+    }
+    return {
+      k: key,
+      z: zero,
+      o: one,
+      t: two,
+      f: few,
+      m: many,
+      r: rest
+    };
+  };
+
+  const REGEX_SWITCH_CASE = /^\{.*\}$/;
+
+  const parseCases = text => Object.fromEntries(removeOuterBrackets(text).split(',').map(part => part.split(':')).reduce((accumulator, entry) => {
+    if (entry.length === 2) {
+      return [ ...accumulator, entry.map(entry2 => entry2.trim()) ];
+    }
+    accumulator[accumulator.length - 1][1] += ',' + entry[0];
+    return accumulator;
+  }, []));
+
+  const REGEX_BRACKETS_SPLIT = /(\{(?:[^{}]+|\{(?:[^{}]+)*\})*\})/g;
+
+  const removeOuterBrackets = text => text.substring(1, text.length - 1);
+
+  const parseRawText = (rawText, optimize = true, firstKey = '', lastKey = '') => rawText.split(REGEX_BRACKETS_SPLIT).map(part => {
+    if (!part.match(REGEX_BRACKETS_SPLIT)) {
+      return part;
+    }
+    const content = removeOuterBrackets(part);
+    if (content.startsWith('{')) {
+      return parsePluralPart(removeOuterBrackets(content), lastKey);
+    }
+    const parsedPart = parseArgumentPart(content);
+    lastKey = parsedPart.k || lastKey;
+    !firstKey && (firstKey = lastKey);
+    return parsedPart;
+  }).map(part => {
+    if (typeof part === 'string') return part;
+    if (!part.k) part.k = firstKey || '0';
+    const trimmed = trimAllValues(part);
+    return optimize ? removeEmptyValues(trimmed) : trimmed;
+  });
+
+  const applyFormatters = (formatters, formatterKeys, initialValue) => formatterKeys.reduce((value, formatterKey) => {
+    var _a, _b;
+    return (_b = formatterKey.match(REGEX_SWITCH_CASE) ? (cases => {
+      var _a2;
+      return (_a2 = cases[value]) !== null && _a2 !== void 0 ? _a2 : cases['*'];
+    })(parseCases(formatterKey)) : (_a = formatters[formatterKey]) === null || _a === void 0 ? void 0 : _a.call(formatters, value)) !== null && _b !== void 0 ? _b : value;
+  }, initialValue);
+
+  const getPlural = (pluralRules, {z: z, o: o, t: t2, f: f, m: m, r: r}, value) => {
+    switch (z && value == 0 ? 'zero' : pluralRules.select(value)) {
+     case 'zero':
+      return z;
+
+     case 'one':
+      return o;
+
+     case 'two':
+      return t2;
+
+     case 'few':
+      return f !== null && f !== void 0 ? f : r;
+
+     case 'many':
+      return m !== null && m !== void 0 ? m : r;
+
+     default:
+      return r;
+    }
+  };
+
+  const REGEX_PLURAL_VALUE_INJECTION = /\?\?/g;
+
+  const applyArguments = (textParts, pluralRules, formatters, args) => textParts.map(part => {
+    if (typeof part === 'string') {
+      return part;
+    }
+    const {k: key = '0', f: formatterKeys = []} = part;
+    const value = args[key];
+    if (isBasicPluralPart(part)) {
+      return ((typeof value === 'boolean' ? value ? part.o : part.r : getPlural(pluralRules, part, value)) || '').replace(REGEX_PLURAL_VALUE_INJECTION, value);
+    }
+    const formattedValue = formatterKeys.length ? applyFormatters(formatters, formatterKeys, value) : value;
+    return ('' + (formattedValue !== null && formattedValue !== void 0 ? formattedValue : '')).trim();
+  }).join('');
+
+  const translate = (textParts, pluralRules, formatters, args) => {
+    const firstArg = args[0];
+    const isObject = firstArg && typeof firstArg === 'object' && firstArg.constructor === Object;
+    const transformedArgs = args.length === 1 && isObject ? firstArg : args;
+    return applyArguments(textParts, pluralRules, formatters, transformedArgs);
+  };
+
+  const getPartsFromString = (cache, text) => cache[text] || (cache[text] = parseRawText(text));
+
+  const getTranslateInstance = (locale, formatters) => {
+    const cache = {};
+    const pluralRules = new Intl.PluralRules(locale);
+    return (text, ...args) => translate(getPartsFromString(cache, text), pluralRules, formatters, args);
+  };
+
+  function i18nObject$1(locale, translations, formatters = {}) {
+    return createProxy(translations, getTranslateInstance(locale, formatters));
+  }
+
+  const wrap = (proxyObject = {}, translateFn) => typeof proxyObject === 'string' ? translateFn.bind(null, proxyObject) : Object.assign(Object.defineProperty(() => '', 'name', {
+    writable: true
+  }), proxyObject);
+
+  const createProxy = (proxyObject, translateFn) => new Proxy(wrap(proxyObject, translateFn), {
+    get: (target, key) => {
+      if (key === Symbol.iterator) return [][Symbol.iterator].bind(Object.values(target).map(entry => wrap(entry, translateFn)));
+      return createProxy(target[key], translateFn);
+    }
+  });
+
+  const baseLocale = 'en-US';
+
+  const locales = [ 'en-US', 'zh-CN' ];
+
+  const loadedLocales = {};
+
+  const loadedFormatters = {};
+
+  const i18nObject = locale => i18nObject$1(locale, loadedLocales[locale], loadedFormatters[locale]);
+
+  const detectLocale = (...detectors) => Nr(baseLocale, locales, ...detectors);
+
+  const initFormatters = locale => {
+    const formatters = {};
+    return formatters;
+  };
+
+  const en_US = {
+    // percentage-ranges
+    modeLabel: 'Mode',
+    modeValue: 'Value',
+    modePercentage: 'Percentage',
+    modeMaxForged: 'Max Forged',
+    avgLabel: 'Avg',
+    hotkeyHint: 'Hotkeys: f, w',
+    unknownError: 'Unknown error',
+    forumLink: 'Forum Link:',
+    pinned: 'Pinned',
+    compareLabel: 'Compare:'
+  };
+
+  const zh_CN = {
+    // percentage-ranges
+    modeLabel: '模式',
+    modeValue: '数值',
+    modePercentage: '百分比',
+    modeMaxForged: '满锻',
+    avgLabel: '平均',
+    hotkeyHint: '快捷键: f, w',
+    unknownError: '未知错误',
+    forumLink: '论坛链接:',
+    pinned: '已固定',
+    compareLabel: '对比:'
+  };
+
+  const localeTranslations = {
+    'en-US': en_US,
+    'zh-CN': zh_CN
+  };
+
+  const loadLocale = locale => {
+    if (loadedLocales[locale]) return;
+    loadedLocales[locale] = localeTranslations[locale];
+    loadFormatters(locale);
+  };
+
+  const loadFormatters = locale => void (loadedFormatters[locale] = initFormatters());
+
+  function initI18n() {
+    const locale = detectLocale(e);
+    loadLocale(locale);
+    return i18nObject(locale);
+  }
+
   const forumsCss = '.hv-tip{position:fixed;width:420px;font-size:8pt;font-family:verdana;text-align:center;color:#5c0d11;background-color:#e3e0d1;padding:4px 0;border:1px solid #5c0d11}.hv-tip p{margin:0}.hv-tip .showequip>div{margin:3px auto 0;padding:1px}.hv-tip .showequip>div:first-child,.hv-tip .eq span,.hv-tip .eqt,.hv-tip .eqr,.hv-tip .eqc{font-weight:700}.hv-tip .showequip>div:first-child{border-bottom:1px solid #a47c78;font-size:10pt;padding:2px 0 4px}.hv-tip .eq>div{margin:1px auto;padding:1px;text-align:center;min-height:17px}.hv-tip .eqt,.hv-tip .eqr{font-size:110%}.hv-tip .ex,.hv-tip .ep{display:grid;gap:2px 5px;justify-items:center}.hv-tip .ex{grid-template-columns:repeat(2,1fr);border-top:1px solid #a47c78;text-align:right!important}.hv-tip .ex>div{width:165px;height:18px}.hv-tip .ex>div>div:nth-child(1){float:left;width:99px;padding:2px;white-space:nowrap}.hv-tip .ex>div>div:nth-child(2){float:left;width:45px;padding:2px 0 2px 2px}.hv-tip .ex>div>div:nth-child(3){float:left;width:6px;padding:2px}.hv-tip .ep>div{width:115px;height:18px}.hv-tip .ep>div:first-child{font-weight:700;margin:4px auto 0!important;width:320px!important;grid-column:1 / -1}.hv-tip .ep>div>div:nth-child(1){float:left;width:60px;padding:2px;text-align:right;white-space:nowrap}.hv-tip .ep>div>div:nth-child(2){float:left;width:45px;padding:2px 0 2px 2px;text-align:left}.hv-tip .ep1{grid-template-columns:repeat(1,1fr)}.hv-tip .ep2{grid-template-columns:repeat(2,1fr)}.hv-tip .ep3{grid-template-columns:repeat(3,1fr)}.hv-tip a:link,.hv-tip a:visited,.hv-tip a:active{color:#5c0d11}';
 
   importCSS(forumsCss);
@@ -37,9 +293,9 @@
 
   importCSS(forumsPersistentCss);
 
-  function isValidKey(e) {
-    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return false;
-    const target = e.target;
+  function isValidKey(e2) {
+    if (e2.repeat || e2.ctrlKey || e2.altKey || e2.metaKey) return false;
+    const target = e2.target;
     if (!target) return false;
     const tag2 = target.tagName;
     if (tag2 === 'INPUT' || tag2 === 'TEXTAREA' || target.isContentEditable) return false;
@@ -279,8 +535,8 @@
     }
     if (statCount > 0) {
       const avg = Number.parseFloat((totalPercent / statCount).toFixed(1));
-      const mode = showMaxForge ? 'Max Forged' : showPercent ? 'Percentage' : 'Value';
-      equip._avg.innerHTML = `<div class="${getColor(avg, 60, 40)}">Avg: ${avg}%</div><div class="text-10px" title="Hotkeys: f, w">Mode: ${mode}</div>`;
+      const mode = showMaxForge ? t.modeMaxForged() : showPercent ? t.modePercentage() : t.modeValue();
+      equip._avg.innerHTML = `<div class="${getColor(avg, 60, 40)}">${t.avgLabel()}: ${avg}%</div><div class="text-10px" title="${t.hotkeyHint()}">${t.modeLabel()}: ${mode}</div>`;
     } else {
       equip._avg.textContent = '';
     }
@@ -336,15 +592,15 @@
     curDeps = deps;
     try {
       return f(arg);
-    } catch (e) {
-      console.error(e);
+    } catch (e2) {
+      console.error(e2);
       return arg;
     } finally {
       curDeps = prevDeps;
     }
   };
 
-  let keepConnected = l => l.filter(b2 => {
+  let keepConnected = l2 => l2.filter(b2 => {
     var _a;
     return (_a = b2._dom) == null ? void 0 : _a.isConnected;
   });
@@ -395,7 +651,7 @@
     let newDom = runAndCaptureDeps(f, deps, dom);
     newDom = (newDom != null ? newDom : document).nodeType ? newDom : new Text(newDom);
     for (let d of deps._getters) deps._setters.has(d) || (addStatesToGc(d), d._bindings.push(binding));
-    for (let l of curNewDerives) l._dom = newDom;
+    for (let l2 of curNewDerives) l2._dom = newDom;
     curNewDerives = prevNewDerives;
     return binding._dom = newDom;
   };
@@ -461,8 +717,8 @@
     let iter = 0, derivedStatesArray = [ ...changedStates ].filter(s2 => s2.rawVal !== s2._oldVal);
     do {
       derivedStates = /* @__PURE__ */ new Set;
-      for (let l of new Set(derivedStatesArray.flatMap(s2 => s2._listeners = keepConnected(s2._listeners)))) derive(l.f, l.s, l._dom), 
-      l._dom = _undefined;
+      for (let l2 of new Set(derivedStatesArray.flatMap(s2 => s2._listeners = keepConnected(s2._listeners)))) derive(l2.f, l2.s, l2._dom), 
+      l2._dom = _undefined;
     } while (++iter < 100 && (derivedStatesArray = [ ...derivedStates ]).length);
     let changedStatesArray = [ ...changedStates ].filter(s2 => s2.rawVal !== s2._oldVal);
     changedStates = _undefined;
@@ -508,10 +764,10 @@
     if (showCompare) {
       const compare = div({
         style: 'padding: 6px; border-top: 1px solid #A47C78;'
-      }, b('Compare: '), select({
+      }, b(t.compareLabel()), select({
         id: 'hv-quality-compare',
-        onchange: e => {
-          renderEquip(container, e.target.value);
+        onchange: e2 => {
+          renderEquip(container, e2.target.value);
         }
       }, Object.keys(quality_configs).map(k => option({
         value: k,
@@ -613,7 +869,7 @@
     };
     try {
       save();
-    } catch (e) {
+    } catch (e2) {
       console.warn('SessionStorage is full, cache failed');
       for (const k of Object.keys(sessionStorage)) {
         if (k.startsWith(CACHE_PREFIX)) {
@@ -665,14 +921,14 @@
     if (isMobile) {
       content.append(createPercentButton(), createForgeButton());
     }
-    const handleDrag = e => {
-      if (e.button !== 0 || !e.isPrimary) return;
-      e.preventDefault();
+    const handleDrag = e2 => {
+      if (e2.button !== 0 || !e2.isPrimary) return;
+      e2.preventDefault();
       pinWin.style.zIndex = String(++zIndex);
-      const target = e.currentTarget;
-      target.setPointerCapture(e.pointerId);
-      const startX = e.clientX;
-      const startY = e.clientY;
+      const target = e2.currentTarget;
+      target.setPointerCapture(e2.pointerId);
+      const startX = e2.clientX;
+      const startY = e2.clientY;
       const {left: left, top: top} = pinWin.getBoundingClientRect();
       const onMove = ev => {
         pinWin.style.left = `${left + (ev.clientX - startX)}px`;
@@ -693,14 +949,14 @@
     }, div({
       class: 'flex-between py-3px px-6px font-bold bg-#5c0d11 text-#edebdf cursor-move select-none touch-none',
       onpointerdown: handleDrag
-    }, span('Pinned'), span({
+    }, span(t.pinned()), span({
       textContent: '[X]',
       class: 'hover:text-red cursor-pointer font-mono ml-2',
       onclick: () => {
         pinWin.remove();
       },
-      onpointerdown: e => {
-        e.stopPropagation();
+      onpointerdown: e2 => {
+        e2.stopPropagation();
       }
     })), content);
     document.body.append(pinWin);
@@ -810,16 +1066,16 @@
           renderContent(link, html);
         } catch (error) {
           if (curLink !== link || error instanceof Error && error.message === 'Aborted') return;
-          tip.innerHTML = `<div class="p-10px color-red font-bold"> ${error instanceof Error ? error.message : 'Unknown error'}</div>`;
+          tip.innerHTML = `<div class="p-10px color-red font-bold"> ${error instanceof Error ? error.message : t.unknownError()}</div>`;
         }
       }, 200);
     }
   };
 
   const initTipEvents = () => {
-    document.addEventListener('pointerover', e => {
-      if (e.pointerType === 'touch') return;
-      const target = e.target;
+    document.addEventListener('pointerover', e2 => {
+      if (e2.pointerType === 'touch') return;
+      const target = e2.target;
       if (tip == null ? void 0 : tip.contains(target)) {
         clearHideTimer();
         return;
@@ -832,12 +1088,12 @@
       }
       renderTip(link);
     });
-    document.addEventListener('pointerout', e => {
+    document.addEventListener('pointerout', e2 => {
       if (!curLink || !tip) return;
-      if (e.pointerType === 'touch') return;
-      const target = e.target;
+      if (e2.pointerType === 'touch') return;
+      const target = e2.target;
       if (!tip.contains(target) && !curLink.contains(target)) return;
-      const related = e.relatedTarget;
+      const related = e2.relatedTarget;
       if (tip.contains(related) || curLink.contains(related)) return;
       clearAbortCtrl();
       clearShowTimer();
@@ -867,8 +1123,8 @@
   };
 
   function initMobileEvents() {
-    document.addEventListener('touchstart', e => {
-      const target = e.target;
+    document.addEventListener('touchstart', e2 => {
+      const target = e2.target;
       const link = target.closest('a');
       clearLongPressTimer();
       isLongPressTriggered = false;
@@ -889,14 +1145,14 @@
       passive: true
     });
     document.addEventListener('touchend', clearLongPressTimer);
-    document.addEventListener('contextmenu', e => {
+    document.addEventListener('contextmenu', e2 => {
       console.log('contextmenu', isLongPressTriggered);
       if (!isLongPressTriggered) return;
-      const target = e.target;
+      const target = e2.target;
       const link = target.closest('a');
       if (link && REGEX_TARGET.test(link.href) || (tip == null ? void 0 : tip.contains(target))) {
-        e.preventDefault();
-        e.stopPropagation();
+        e2.preventDefault();
+        e2.stopPropagation();
       }
     });
   }
@@ -923,9 +1179,9 @@
     if (isMobile) {
       initMobileEvents();
     }
-    document.addEventListener('keydown', e => {
-      if (!isValidKey(e)) return;
-      const key = e.key.toLowerCase();
+    document.addEventListener('keydown', e2 => {
+      if (!isValidKey(e2)) return;
+      const key = e2.key.toLowerCase();
       if (key === keyboard_configs.key_pin) {
         actionPinWindow();
       } else if (key === keyboard_configs.key_delete) {
@@ -940,16 +1196,16 @@
     for (const el of document.querySelectorAll('.showequip')) {
       initEquip(el);
     }
-    document.addEventListener('keydown', e => {
-      if (!isValidKey(e)) return;
-      switch (e.key.toLowerCase()) {
+    document.addEventListener('keydown', e2 => {
+      if (!isValidKey(e2)) return;
+      switch (e2.key.toLowerCase()) {
        case keyboard_configs.key_toggle:
-        e.preventDefault();
+        e2.preventDefault();
         togglePercent();
         break;
 
        case keyboard_configs.key_forge:
-        e.preventDefault();
+        e2.preventDefault();
         toggleForge();
         break;
 
@@ -960,12 +1216,14 @@
           if (!first) return;
           const equip = equipMap.get(first);
           if (!equip) return;
-          globalThis.prompt('Forum Link:', `[url=${location.href}]${equip.title}[/url]`);
+          globalThis.prompt(t.forumLink(), `[url=${location.href}]${equip.title}[/url]`);
         }
         break;
       }
     }, true);
   }
+
+  const t = initI18n();
 
   initHv();
 
