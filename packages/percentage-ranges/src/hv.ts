@@ -2,6 +2,7 @@ import { isValidKey } from 'common/keyboard';
 
 import { initEquip } from './equip';
 import { equipMap, toggleForge, togglePercent } from './equip/state';
+import { t } from './main';
 import { keyboard_configs, REGEX_TARGET } from './shared';
 
 export function initHv() {
@@ -33,7 +34,7 @@ export function initHv() {
             const equip = equipMap.get(first);
             if (!equip) return;
 
-            globalThis.prompt('Forum Link:', `[url=${location.href}]${equip.title}[/url]`);
+            globalThis.prompt(t.forumLink(), `[url=${location.href}]${equip.title}[/url]`);
           }
           break;
       }

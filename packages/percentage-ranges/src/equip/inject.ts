@@ -1,5 +1,6 @@
 import { isMobile } from 'common/mobile';
 
+import { t } from '../main';
 import { createForgeButton, createPercentButton } from '../mobile';
 import { equipInfo } from '../observe';
 import { quality_configs } from './config';
@@ -24,7 +25,7 @@ export function injectCompare(container: HTMLElement, quality: Quality) {
       {
         style: 'padding: 6px; border-top: 1px solid #A47C78;',
       },
-      b('Compare: '),
+      b(t.compareLabel()),
       select(
         {
           id: 'hv-quality-compare',

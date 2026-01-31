@@ -1,6 +1,7 @@
 import { isMobile } from 'common/mobile';
 
 import { initEquip } from '../equip';
+import { t } from '../main';
 import { createForgeButton, createPercentButton } from '../mobile';
 import { getCache } from './cache';
 
@@ -65,7 +66,7 @@ export function createPin(tip: HTMLElement, url: string) {
           'flex-between py-3px px-6px font-bold bg-#5c0d11 text-#edebdf cursor-move select-none touch-none',
         onpointerdown: handleDrag,
       },
-      span('Pinned'),
+      span(t.pinned()),
       span({
         textContent: '[X]',
         class: 'hover:text-red cursor-pointer font-mono ml-2',

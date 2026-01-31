@@ -1,0 +1,16 @@
+{
+  "name": "i18n",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typesafe-i18n": "typesafe-i18n",
+    "check": "tsc --noEmit --skipLibCheck",
+    "lint": "eslint . --fix"
+  },
+  "dependencies": {
+    "typesafe-i18n": "^5.26.2"
+  }
+}

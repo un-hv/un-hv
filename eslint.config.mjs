@@ -55,6 +55,13 @@ export default defineConfig(
       'import-x/no-default-export': ['warn'],
     },
   },
+  {
+    files: ['packages/i18n/src/i18n/*/*.ts', '**/*.config.{js,mjs,ts}'],
+    rules: {
+      'import-x/prefer-default-export': 'error',
+      'import-x/no-default-export': 'off',
+    },
+  },
   pluginUnicorn.configs.unopinionated,
   pluginRegexp.configs['flat/recommended'],
   {
@@ -69,9 +76,9 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.config.{js,mjs,ts}'],
+    files: ['packages/*/src/index.ts'],
     rules: {
-      'import-x/no-default-export': 'off',
+      'barrel-files/avoid-barrel-files': 'off',
     },
   },
   {

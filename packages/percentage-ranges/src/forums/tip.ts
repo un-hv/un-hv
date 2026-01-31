@@ -2,6 +2,7 @@ import { isMobile } from 'common/mobile';
 import { GM_Request } from 'common/request';
 
 import { initEquip } from '../equip';
+import { t } from '../main';
 import { createForgeButton, createPercentButton, createPinButton } from '../mobile';
 import { REGEX_TARGET } from '../shared';
 import { getCache, setCache } from './cache';
@@ -124,7 +125,7 @@ export const renderTip = (link: HTMLAnchorElement) => {
         renderContent(link, html);
       } catch (error) {
         if (curLink !== link || (error instanceof Error && error.message === 'Aborted')) return;
-        tip.innerHTML = `<div class="p-10px color-red font-bold"> ${error instanceof Error ? error.message : 'Unknown error'}</div>`;
+        tip.innerHTML = `<div class="p-10px color-red font-bold"> ${error instanceof Error ? error.message : t.unknownError()}</div>`;
       }
     }, 200);
   }

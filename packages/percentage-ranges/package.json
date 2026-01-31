@@ -11,6 +11,7 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
-    "common": "workspace:*"
+    "common": "workspace:*",
+    "i18n": "workspace:*"
   }
 }

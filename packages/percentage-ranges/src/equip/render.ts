@@ -1,3 +1,4 @@
+import { t } from '../main';
 import { quality_configs } from './config';
 import { equipMap, globalState } from './state';
 
@@ -86,12 +87,12 @@ export function renderEquip(container: HTMLElement, compareQuality: Quality | nu
   if (statCount > 0) {
     const avg = Number.parseFloat((totalPercent / statCount).toFixed(1));
     const mode =
-      showMaxForge ? 'Max Forged'
-      : showPercent ? 'Percentage'
-      : 'Value';
+      showMaxForge ? t.modeMaxForged()
+      : showPercent ? t.modePercentage()
+      : t.modeValue();
     equip._avg.innerHTML =
-      `<div class="${getColor(avg, 60, 40)}">Avg: ${avg}%</div>`
-      + `<div class="text-10px" title="Hotkeys: f, w">Mode: ${mode}</div>`;
+      `<div class="${getColor(avg, 60, 40)}">${t.avgLabel()}: ${avg}%</div>`
+      + `<div class="text-10px" title="${t.hotkeyHint()}">${t.modeLabel()}: ${mode}</div>`;
   } else {
     equip._avg.textContent = '';
   }
